@@ -9,9 +9,7 @@ import kalbe.corp.genexsupabasepoc.data.supabaseClient
 import kalbe.corp.genexsupabasepoc.navigation.NavGraph
 import kalbe.corp.genexsupabasepoc.ui.theme.GeneXSupabasePOCTheme
 
-
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
