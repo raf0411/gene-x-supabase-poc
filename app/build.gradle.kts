@@ -1,10 +1,22 @@
+import java.util.Properties
+
 plugins {
     var kotlin_version = "2.0.0"
 
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    kotlin("plugin.serialization") version kotlin_version
+    id ("org.jetbrains.kotlin.plugin.serialization") version kotlin_version
+}
+
+
+val properties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { input ->
+        properties.load(input.reader(Charsets.UTF_8))
+    }
 }
 
 android {
@@ -17,8 +29,11 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${properties.getProperty("SUPABASE_ANON_KEY", "")}\"")
+        buildConfigField("String", "SECRET", "\"${properties.getProperty("SECRET", "")}\"")
+        buildConfigField("String", "SUPABASE_URL", "\"${properties.getProperty("SUPABASE_URL", "")}\"")
     }
 
     buildTypes {
@@ -39,12 +54,14 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
     var supabase_version = "3.1.2"
     var ktor_version = "3.1.1"
+    var hilt_version = "2.50"
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -65,4 +82,14 @@ dependencies {
     implementation(platform("io.github.jan-tennert.supabase:bom:$supabase_version"))
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.ktor:ktor-client-android:$ktor_version")
+    implementation( "io.github.jan-tennert.supabase:postgrest-kt:$supabase_version")
+    implementation ("io.github.jan-tennert.supabase:storage-kt:$supabase_version")
+    implementation ("io.github.jan-tennert.supabase:auth-kt:$supabase_version")
+    implementation ("io.ktor:ktor-client-android:$ktor_version")
+    implementation ("io.ktor:ktor-client-core:$ktor_version")
+    implementation ("io.ktor:ktor-utils:$ktor_version")
+
+    implementation( "com.google.dagger:hilt-android:$hilt_version")
+    annotationProcessor ("com.google.dagger:hilt-compiler:$hilt_version")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 }
