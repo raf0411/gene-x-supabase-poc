@@ -1,22 +1,8 @@
-import java.util.Properties
-
 plugins {
-    var kotlin_version = "2.0.0"
-
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id ("org.jetbrains.kotlin.plugin.serialization") version kotlin_version
-}
-
-
-val properties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.inputStream().use { input ->
-        properties.load(input.reader(Charsets.UTF_8))
-    }
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 android {
@@ -30,10 +16,6 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${properties.getProperty("SUPABASE_ANON_KEY", "")}\"")
-        buildConfigField("String", "SECRET", "\"${properties.getProperty("SECRET", "")}\"")
-        buildConfigField("String", "SUPABASE_URL", "\"${properties.getProperty("SUPABASE_URL", "")}\"")
     }
 
     buildTypes {
@@ -55,14 +37,26 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        viewBinding = true
     }
 }
 
 dependencies {
-    var supabase_version = "3.1.2"
-    var ktor_version = "3.1.1"
-    var hilt_version = "2.50"
+    implementation (libs.androidx.navigation.compose)
 
+    implementation (libs.coil.compose)
+
+    implementation (platform (libs.supabase.bom))
+    implementation (libs.realtime.kt)
+    implementation (libs.postgrest.kt)
+    implementation (libs.ktor.client.android)
+    implementation (libs.kotlinx.serialization.json)
+
+    implementation(libs.material)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -78,18 +72,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation(platform("io.github.jan-tennert.supabase:bom:$supabase_version"))
-    implementation("io.github.jan-tennert.supabase:postgrest-kt")
-    implementation("io.ktor:ktor-client-android:$ktor_version")
-    implementation( "io.github.jan-tennert.supabase:postgrest-kt:$supabase_version")
-    implementation ("io.github.jan-tennert.supabase:storage-kt:$supabase_version")
-    implementation ("io.github.jan-tennert.supabase:auth-kt:$supabase_version")
-    implementation ("io.ktor:ktor-client-android:$ktor_version")
-    implementation ("io.ktor:ktor-client-core:$ktor_version")
-    implementation ("io.ktor:ktor-utils:$ktor_version")
-
-    implementation( "com.google.dagger:hilt-android:$hilt_version")
-    annotationProcessor ("com.google.dagger:hilt-compiler:$hilt_version")
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 }

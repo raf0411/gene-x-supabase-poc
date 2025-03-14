@@ -1,0 +1,4 @@
+package kalbe.corp.genexsupabasepoc.utils
+
+const val SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzbWltamh4cmJkb2ZrYnh3aWJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4ODczNjgsImV4cCI6MjA1NzQ2MzM2OH0.V54yVw6ty7Pw7gm_Th5YcZr0JcHJs-Y-vnZA8kCexjc"
+const val SUPABASE_URL= "https://usmimjhxrbdofkbxwibv.supabase.co"
