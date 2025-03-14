@@ -19,21 +19,28 @@ fun NavGraph(supabaseClient: SupabaseClient) {
     NavHost(navController = navController, startDestination = Routes.ProductCatalogueScreen) {
         composable<Routes.ProductCatalogueScreen> {
             ProductCatalogueScreen(
-                productRepository, onProductClick = { productId ->
+                productRepository,
+                navController,
+                onProductClick = { productId ->
                     navController.navigate(Routes.ProductDetailsScreen(productId))
                 })
         }
 
         composable<Routes.ProductListScreen> {
             ProductListScreen(
-                productRepository = productRepository, onProductClick = { productId ->
+                productRepository = productRepository,
+                navController,
+                onProductClick = { productId ->
                     navController.navigate(Routes.ProductDetailsScreen(productId))
                 })
         }
 
         composable<Routes.ProductDetailsScreen> {
             val args = it.toRoute<Routes.ProductDetailsScreen>()
-            ProductDetailsScreen(productRepository, productID = args.productID)
+            ProductDetailsScreen(
+                productRepository,
+                navController,
+                productID = args.productID)
         }
     }
 }

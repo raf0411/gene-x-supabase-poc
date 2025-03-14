@@ -1,4 +1,4 @@
-package kalbe.corp.genexsupabasepoc.ui.screen
+package kalbe.corp.genexsupabasepoc.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,8 +44,9 @@ fun ProductItem(
             .width(300.dp)
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .shadow(12.dp, shape = MaterialTheme.shapes.medium)
-            .background(Color.White, shape = RoundedCornerShape(12.dp)),
+            .shadow(12.dp, MaterialTheme.shapes.medium)
+            .background(Color.White, shape = RoundedCornerShape(12.dp))
+            .padding(bottom = 24.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(

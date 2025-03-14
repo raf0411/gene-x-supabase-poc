@@ -1,4 +1,4 @@
-package kalbe.corp.genexsupabasepoc.ui.screen
+package kalbe.corp.genexsupabasepoc.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
