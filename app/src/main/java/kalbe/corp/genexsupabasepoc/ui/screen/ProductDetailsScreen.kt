@@ -51,6 +51,7 @@ fun ProductDetailsScreen(
     productRepository: ProductRepository,
     navController: NavController,
     productID: String,
+    sessionID: String,
 ) {
     var product by remember {
         mutableStateOf<Product?>(null)
@@ -71,7 +72,10 @@ fun ProductDetailsScreen(
         topBar = {
             NavBar(navController)
         },
-        bottomBar = { BottomBar() }
+        bottomBar = { BottomBar(
+            productID = productID,
+            sessionID = sessionID,
+        ) }
     ) {
         Column(modifier = Modifier
             .fillMaxSize()

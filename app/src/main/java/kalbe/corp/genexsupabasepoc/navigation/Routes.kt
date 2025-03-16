@@ -11,5 +11,8 @@ sealed class Routes {
     data object ProductListScreen : Routes()
 
     @Serializable
+    data object WishlistScreen : Routes()
+
+    @Serializable
     data class ProductDetailsScreen(val productID: String) : Routes()
 }

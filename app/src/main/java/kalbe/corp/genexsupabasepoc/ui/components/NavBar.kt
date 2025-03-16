@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kalbe.corp.genexsupabasepoc.navigation.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +35,7 @@ fun NavBar(
             }
         },
         actions = {
-            IconButton(onClick = { /* Handle Wishlist */ }) {
+            IconButton(onClick = {navController.navigate(Routes.WishlistScreen)}) {
                 Icon(Icons.Default.FavoriteBorder, contentDescription = "Wishlist")
             }
             IconButton(onClick = { /* Handle Delivery */ }) {

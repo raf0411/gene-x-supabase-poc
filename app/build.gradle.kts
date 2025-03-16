@@ -73,4 +73,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation ("androidx.compose.material:material-icons-extended:1.5.1")
+    implementation("com.google.dagger:hilt-android:2.48")
+    implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
+    implementation("androidx.activity:activity-ktx:1.8.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
 }
