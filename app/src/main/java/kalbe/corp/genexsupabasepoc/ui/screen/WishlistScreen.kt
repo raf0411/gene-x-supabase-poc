@@ -24,9 +24,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import io.github.jan.supabase.gotrue.auth
 import kalbe.corp.genexsupabasepoc.data.ProductRepository
 import kalbe.corp.genexsupabasepoc.data.WishlistRepository
 import kalbe.corp.genexsupabasepoc.data.WishlistService
+import kalbe.corp.genexsupabasepoc.data.supabaseClient
 import kalbe.corp.genexsupabasepoc.models.Wishlist
 import kalbe.corp.genexsupabasepoc.ui.components.NavBar
 import kalbe.corp.genexsupabasepoc.ui.components.WishlistItem
@@ -39,15 +41,24 @@ fun WishlistScreen(
     navController: NavController,
     onWishlistClick: (String) -> Unit,
 ) {
-    var coroutineScope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var wishlists by remember { mutableStateOf<List<Wishlist>>(emptyList()) }
+    var userID by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(key1 = true) {
-        try {
-            wishlists = wishlistRepository.getWishlists()
-        } catch (e: Exception) {
-            Log.e("SupabaseError", "Error fetching wishlists", e)
+    LaunchedEffect(Unit) {
+        val session = supabaseClient.auth.currentSessionOrNull()
+        userID = session?.user?.id
+        Log.d("UserID", "UserID : $userID")
+    }
+
+    LaunchedEffect(userID) {
+        userID?.let {
+            try {
+                wishlists = wishlistRepository.getWishlists(it)
+            } catch (e: Exception) {
+                Log.e("SupabaseError", "Error fetching wishlists", e)
+            }
         }
     }
 
@@ -89,10 +100,10 @@ fun WishlistScreen(
                                 coroutineScope.launch {
                                     val success = WishlistService().deleteWishlist(wishlist)
 
-                                    if(success){
+                                    if (success) {
                                         Toast.makeText(context, "Product deleted from Wishlist", Toast.LENGTH_LONG).show()
-                                        wishlists = wishlistRepository.getWishlists()
-                                    } else{
+                                        wishlists = userID?.let { wishlistRepository.getWishlists(it) }!!
+                                    } else {
                                         Toast.makeText(context, "Product failed to delete from Wishlist", Toast.LENGTH_LONG).show()
                                     }
                                 }

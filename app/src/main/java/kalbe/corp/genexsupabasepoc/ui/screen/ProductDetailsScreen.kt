@@ -51,7 +51,6 @@ fun ProductDetailsScreen(
     productRepository: ProductRepository,
     navController: NavController,
     productID: String,
-    sessionID: String,
 ) {
     var product by remember {
         mutableStateOf<Product?>(null)
@@ -74,7 +73,6 @@ fun ProductDetailsScreen(
         },
         bottomBar = { BottomBar(
             productID = productID,
-            sessionID = sessionID,
         ) }
     ) {
         Column(modifier = Modifier

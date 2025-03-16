@@ -2,6 +2,7 @@ package kalbe.corp.genexsupabasepoc.data
 
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
 import io.ktor.client.plugins.websocket.WebSockets
@@ -15,6 +16,7 @@ val supabaseClient = createSupabaseClient(
 ){
     install(Realtime)
     install(Postgrest)
+    install(Auth)
     httpConfig {
         this.install(WebSockets)
     }

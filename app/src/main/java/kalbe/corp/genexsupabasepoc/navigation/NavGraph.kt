@@ -1,12 +1,12 @@
 package kalbe.corp.genexsupabasepoc.navigation
 
-import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import io.github.jan.supabase.SupabaseClient
+import kalbe.corp.genexsupabasepoc.RegisterScreen
 import kalbe.corp.genexsupabasepoc.data.ProductRepository
 import kalbe.corp.genexsupabasepoc.data.WishlistRepository
 import kalbe.corp.genexsupabasepoc.ui.screen.ProductCatalogueScreen
@@ -20,7 +20,13 @@ fun NavGraph(supabaseClient: SupabaseClient) {
     val productRepository = ProductRepository(supabaseClient)
     val wishlistRepository = WishlistRepository(supabaseClient)
 
-    NavHost(navController = navController, startDestination = Routes.ProductCatalogueScreen) {
+    NavHost(navController = navController, startDestination = Routes.RegisterScreen) {
+        composable<Routes.RegisterScreen>{
+            RegisterScreen(
+                navController,
+            )
+        }
+
         composable<Routes.ProductCatalogueScreen> {
             ProductCatalogueScreen(
                 productRepository = productRepository,
@@ -45,7 +51,6 @@ fun NavGraph(supabaseClient: SupabaseClient) {
                 productRepository,
                 navController,
                 productID = args.productID,
-                sessionID = Settings.Secure.ANDROID_ID
             )
         }
 

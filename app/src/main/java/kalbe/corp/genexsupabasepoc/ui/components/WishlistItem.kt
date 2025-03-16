@@ -68,13 +68,16 @@ fun WishlistItem(
         AsyncImage(
             model = product?.image,
             modifier = Modifier.size(64.dp),
-            contentDescription = null,
+            contentDescription = "Product Image",
         )
 
+        Spacer(Modifier.width(32.dp))
 
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Text(
-                text = product?.name ?: "Unknown",
+                text = product?.name?.let { if (it.length > 20) it.take(20) + "..." else it } ?: "Unknown",
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 color = Color.Black,

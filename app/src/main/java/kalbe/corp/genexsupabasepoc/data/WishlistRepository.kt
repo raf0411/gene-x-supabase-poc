@@ -6,11 +6,17 @@ import io.github.jan.supabase.postgrest.from
 import kalbe.corp.genexsupabasepoc.models.Wishlist
 
 class WishlistRepository(private val supabaseClient: SupabaseClient) {
-    suspend fun getWishlists(): List<Wishlist> {
+    suspend fun getWishlists(sessionID: String): List<Wishlist> {
         return try {
-            supabaseClient.from("wishlists").select().decodeList<Wishlist>().also {
-                Log.d("SupabaseSuccess", "Fetched ${it.size} wishlists")
-            }
+            val result = supabaseClient
+                .from("wishlists")
+                .select {
+                    filter { Wishlist::session_id eq sessionID }
+                }
+                .decodeList<Wishlist>()
+
+            Log.d("SupabaseSuccess", "Fetched ${result.size} wishlists")
+            result
         } catch (e: Exception) {
             Log.e("SupabaseError", "Error fetching wishlists", e)
             emptyList()
