@@ -69,9 +69,9 @@ fun BottomBar(
                                 val success = WishlistService().insertWishlist(newWishlist)
 
                                 if(success){
-                                    Toast.makeText(context, "Added to Wishlist", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, "Added to Wishlist", Toast.LENGTH_SHORT).show()
                                 } else{
-                                    Toast.makeText(context, "Failed to add Wishlist", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, "Failed to add Wishlist", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
