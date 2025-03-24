@@ -1,8 +1,18 @@
+import org.jetbrains.kotlin.konan.properties.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.0.0"
+}
+
+val localProps = Properties()
+val localPropertiesFile = File(rootProject.rootDir, "raffi.properties")
+if(localPropertiesFile.exists() && localPropertiesFile.isFile){
+    localPropertiesFile.inputStream().use {
+        localProps.load(it)
+    }
 }
 
 android {
@@ -22,9 +32,15 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
+            buildConfigField("String", "SUPABASE_ANON_KEY", localProps.getProperty("SUPABASE_ANON_KEY"))
+            buildConfigField("String", "SUPABASE_URL", localProps.getProperty("SUPABASE_URL"))
+        }
+
+        debug {
+            buildConfigField("String", "SUPABASE_ANON_KEY", localProps.getProperty("SUPABASE_ANON_KEY"))
+            buildConfigField("String", "SUPABASE_URL", localProps.getProperty("SUPABASE_URL"))
         }
     }
     compileOptions {
@@ -53,13 +69,13 @@ dependencies {
 
     implementation(libs.ktor.client.okhttp)
 
-    implementation (libs.androidx.navigation.compose)
-    implementation (libs.coil.compose)
-    implementation (platform (libs.supabase.bom))
-    implementation (libs.realtime.kt)
-    implementation (libs.postgrest.kt)
-    implementation (libs.ktor.client.android)
-    implementation (libs.kotlinx.serialization.json)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.coil.compose)
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.realtime.kt)
+    implementation(libs.postgrest.kt)
+    implementation(libs.ktor.client.android)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.material)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
@@ -81,7 +97,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation ("androidx.compose.material:material-icons-extended:1.5.1")
+    implementation("androidx.compose.material:material-icons-extended:1.5.1")
     implementation("com.google.dagger:hilt-android:2.48")
     implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
     implementation("androidx.activity:activity-ktx:1.8.0")

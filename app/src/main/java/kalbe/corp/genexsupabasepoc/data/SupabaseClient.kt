@@ -6,13 +6,12 @@ import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
 import io.ktor.client.plugins.websocket.WebSockets
-import kalbe.corp.genexsupabasepoc.utils.SUPABASE_ANON_KEY
-import kalbe.corp.genexsupabasepoc.utils.SUPABASE_URL
+import kalbe.corp.genexsupabasepoc.BuildConfig
 
 @OptIn(SupabaseInternal::class)
 val supabaseClient = createSupabaseClient(
-    supabaseKey = SUPABASE_ANON_KEY,
-    supabaseUrl = SUPABASE_URL,
+    supabaseKey = BuildConfig.SUPABASE_ANON_KEY,
+    supabaseUrl = BuildConfig.SUPABASE_URL,
 ){
     install(Realtime)
     install(Postgrest)
