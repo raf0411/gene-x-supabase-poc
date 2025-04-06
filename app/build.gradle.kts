@@ -64,16 +64,16 @@ dependencies {
     implementation(libs.googleid)
 
     // Supabase
-    implementation(platform(libs.supabase.bom))
-    implementation(libs.auth.kt)
-
-    implementation(libs.ktor.client.okhttp)
+    implementation (platform (libs.supabase.bom))
+    implementation (libs.auth.kt)
+    implementation (libs.ktor.client.okhttp)
+    implementation (libs.realtime.kt)
+    implementation (libs.postgrest.kt)
+    implementation (libs.ktor.client.android)
+    implementation (libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)
-    implementation(platform(libs.supabase.bom))
-    implementation(libs.realtime.kt)
-    implementation(libs.postgrest.kt)
     implementation(libs.ktor.client.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.material)
@@ -97,10 +97,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("androidx.compose.material:material-icons-extended:1.5.1")
-    implementation("com.google.dagger:hilt-android:2.48")
-    implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
-    implementation("androidx.activity:activity-ktx:1.8.0")
-    implementation("androidx.fragment:fragment-ktx:1.6.1")
-    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.0")
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel)
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.fragment.ktx)
 }

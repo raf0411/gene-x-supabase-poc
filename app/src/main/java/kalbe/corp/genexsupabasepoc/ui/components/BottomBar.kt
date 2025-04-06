@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.auth.auth
 import kalbe.corp.genexsupabasepoc.data.WishlistService
 import kalbe.corp.genexsupabasepoc.data.supabaseClient
 import kalbe.corp.genexsupabasepoc.models.Wishlist
