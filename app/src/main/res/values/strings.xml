@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GeneX POC - Shop</string>
+    <string name="app_name">GeneX POC</string>
     <string name="product_list_text_screen_title">Product List</string>
     <string name="product_details_text_screen_title">Product Details</string>
     <string name="add_product_text_screen_title">Add Product</string>

@@ -47,8 +47,8 @@ import kotlinx.coroutines.launch
 fun EmailLoginScreen(
     authRepository: AuthRepository,
     onLoginSuccess: (Boolean) -> Unit,
+    email: String,
 ) {
-    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -77,23 +77,12 @@ fun EmailLoginScreen(
                     .padding(24.dp)
                     .fillMaxWidth()
             ) {
-                Text(text = "Email", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Email") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(32.dp),
-                )
-
-                Spacer(Modifier.height(16.dp))
-
                 Text(text = "Password", fontSize = 16.sp, fontWeight = FontWeight.Bold)
 
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text("Enter your password") },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val icon =

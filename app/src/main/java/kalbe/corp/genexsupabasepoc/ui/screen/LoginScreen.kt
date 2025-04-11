@@ -1,5 +1,6 @@
 package kalbe.corp.genexsupabasepoc.ui.screen
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -30,7 +30,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -40,13 +39,20 @@ import kalbe.corp.genexsupabasepoc.navigation.Routes
 import kotlinx.coroutines.launch
 
 @Composable
-fun PhoneLoginScreen(
+fun LoginScreen(
     authRepository: AuthRepository,
     navController: NavController,
 ){
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-    var phone by remember { mutableStateOf("") }
+    var loginField by remember { mutableStateOf("") }
+
+    fun isEmail(input: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(input).matches()
+    }
+
+    fun isPhone(input: String): Boolean {
+        val phoneRegex = Regex("^\\+?\\d{10,15}$")
+        return phoneRegex.matches(input)
+    }
 
     Column(
         modifier = Modifier
@@ -73,44 +79,59 @@ fun PhoneLoginScreen(
                     .padding(24.dp)
                     .fillMaxWidth()
             ) {
-                Text(text = "Phone", fontWeight = FontWeight.Bold, fontSize = 24.sp)
-
-                Spacer(Modifier.height(16.dp))
-
+                Text(text = "Email/Phone", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 OutlinedTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = { Text("e.g. +62000129392") },
+                    value = loginField,
+                    onValueChange = { loginField = it },
+                    label = { Text("Enter your email/phone") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(32.dp),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Phone
-                    )
                 )
 
                 Spacer(Modifier.height(16.dp))
 
+                val coroutineScope = rememberCoroutineScope()
+                var errorMessage by remember { mutableStateOf<String?>(null) }
+
                 Button(
                     onClick = {
                         coroutineScope.launch {
-//                            authRepository.signUpPhoneUser(phone)
+                            try {
+                                if (isEmail(loginField)) {
+                                    Log.d("LoginCheck", "Email detected")
+                                    navController.navigate(Routes.EmailLoginScreen(email = loginField))
+                                } else if (isPhone(loginField)) {
+                                    Log.d("LoginCheck", "Phone detected: $loginField")
+                                    val success = authRepository.sendOtpToPhone(loginField)
 
-                            val success = authRepository.sendOtpToPhone(phone)
+                                    if (success) {
+                                        Log.d("LoginCheck", "OTP Sent successfully, navigating to OTP screen.")
+                                        navController.navigate(Routes.OtpScreen(phone = loginField))
+                                    } else {
+                                        errorMessage = "Failed to send OTP. Please check the number or try again."
+                                        Log.w("LoginCheck", "sendOtpToPhone returned false.")
+                                    }
 
-                            if (success) {
-                                navController.navigate(Routes.OtpScreen(phone = phone))
-                            } else {
-                                Toast.makeText(context, "Failed to send OTP", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    errorMessage = "Invalid email or phone format."
+                                }
+                            } catch (e: Exception) {
+                                errorMessage = "Login failed: ${e.message}"
+                                Log.e("LoginCheck", "Login exception: ${e.message}", e)
                             }
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Black,
-                        contentColor = Color.White,
+                        contentColor = Color.White
                     )
                 ) {
-                    Text(text = "Send OTP", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text("Login")
+                }
+                errorMessage?.let {
+                    Toast.makeText(LocalContext.current, it, Toast.LENGTH_LONG).show()
+                    errorMessage = null
                 }
             }
         }

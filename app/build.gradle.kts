@@ -71,6 +71,7 @@ dependencies {
     implementation (libs.postgrest.kt)
     implementation (libs.ktor.client.android)
     implementation (libs.kotlinx.serialization.json)
+    implementation(libs.gotrue.kt)
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)
