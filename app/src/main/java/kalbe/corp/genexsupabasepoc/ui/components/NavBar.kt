@@ -21,7 +21,7 @@ import kalbe.corp.genexsupabasepoc.navigation.Routes
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavBar(
-    navController: NavController
+    navController: NavController,
 ){
     TopAppBar(
         title = { Text("Shop", fontWeight = FontWeight.Bold) },

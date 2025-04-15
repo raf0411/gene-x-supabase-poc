@@ -88,7 +88,9 @@ fun NavGraph(
         }
 
         composable<Routes.ProfileScreen> {
-            ProfileScreen()
+            ProfileScreen(
+                navController = navController,
+            )
         }
 
         composable<Routes.ProductCatalogueScreen> {

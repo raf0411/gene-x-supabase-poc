@@ -6,6 +6,7 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.OTP
 import io.github.jan.supabase.postgrest.from
+import kalbe.corp.genexsupabasepoc.models.UserProfile
 
 class AuthRepository {
     suspend fun sendOtpToPhone(phone: String): Boolean {
@@ -60,15 +61,15 @@ class AuthRepository {
             val userId = supabaseClient.auth.currentUserOrNull()?.id
                 ?: throw Exception("User not logged in")
 
-            val profile = supabaseClient.from("auth")
+            val user = supabaseClient.from("users")
                 .select {
                     filter {
-                        eq("user_id", userId)
+                        eq("account_id", userId)
                     }
                 }
                 .decodeSingle<UserProfile>()
 
-            return profile.isFirstTimeLogin
+            return user.isFirstTimeLogin
 
         } catch (e: Exception) {
             e.printStackTrace()

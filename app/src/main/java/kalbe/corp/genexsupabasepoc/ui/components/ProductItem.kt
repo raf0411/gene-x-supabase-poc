@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -109,4 +110,15 @@ fun ProductItem(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun ProductItemPreview(){
+    val product: Product = Product("1", "Nama", 15.05, "None", 12, 5.0, "Jelek", "Pills")
+
+    ProductItem(
+        product = product,
+        onClick = {},
+    )
 }
