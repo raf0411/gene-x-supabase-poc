@@ -43,9 +43,10 @@ fun ProductListScreen(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         items(productList) { product ->
-            ProductItem(product = product, onClick = {
-                onProductClick(product.id)
-            })
+            ProductItem(
+                product = product,
+                onClick = { onProductClick(product.id) },
+            )
         }
     }
 }

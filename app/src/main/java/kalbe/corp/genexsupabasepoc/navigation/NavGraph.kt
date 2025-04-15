@@ -6,10 +6,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import io.github.jan.supabase.SupabaseClient
 import kalbe.corp.genexsupabasepoc.data.AuthRepository
 import kalbe.corp.genexsupabasepoc.data.ProductRepository
 import kalbe.corp.genexsupabasepoc.data.WishlistRepository
+import kalbe.corp.genexsupabasepoc.data.supabaseClient
 import kalbe.corp.genexsupabasepoc.ui.screen.EmailLoginScreen
 import kalbe.corp.genexsupabasepoc.ui.screen.LoginScreen
 import kalbe.corp.genexsupabasepoc.ui.screen.OtpScreen
@@ -19,16 +19,15 @@ import kalbe.corp.genexsupabasepoc.ui.screen.ProductCatalogueScreen
 import kalbe.corp.genexsupabasepoc.ui.screen.ProductDetailsScreen
 import kalbe.corp.genexsupabasepoc.ui.screen.ProductListScreen
 import kalbe.corp.genexsupabasepoc.ui.screen.ProfileScreen
+import kalbe.corp.genexsupabasepoc.ui.screen.ProfileSelectionScreen
 import kalbe.corp.genexsupabasepoc.ui.screen.ResetPasswordScreen
 import kalbe.corp.genexsupabasepoc.ui.screen.WishlistScreen
 
 @Composable
-fun NavGraph(
-    supabaseClient: SupabaseClient,
-) {
+fun NavGraph() {
     val navController = rememberNavController()
-    val productRepository = ProductRepository(supabaseClient)
-    val wishlistRepository = WishlistRepository(supabaseClient)
+    val productRepository = ProductRepository()
+    val wishlistRepository = WishlistRepository()
     val authRepository = AuthRepository()
 
     NavHost(navController = navController, startDestination = Routes.LoginScreen) {
@@ -72,7 +71,7 @@ fun NavGraph(
                     if (isFirstTimeLogin) {
                         navController.navigate(Routes.ResetPasswordScreen)
                     } else {
-                        navController.navigate(Routes.ProfileScreen)
+                        navController.navigate(Routes.ProfileSelectionScreen)
                     }
                 },
                 email = screen.email,
@@ -84,13 +83,19 @@ fun NavGraph(
                 supabaseClient = supabaseClient,
                 onResetSuccess = {
                     Log.d("SuccessLogin", "Login Successful!")
-                    navController.navigate(Routes.ProfileScreen)
+                    navController.navigate(Routes.ProfileSelectionScreen)
                 },
             )
         }
 
         composable<Routes.ProfileScreen> {
             ProfileScreen(
+                navController = navController,
+            )
+        }
+
+        composable<Routes.ProfileSelectionScreen> {
+            ProfileSelectionScreen(
                 navController = navController,
             )
         }

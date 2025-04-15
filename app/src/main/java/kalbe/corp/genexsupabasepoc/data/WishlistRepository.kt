@@ -1,11 +1,10 @@
 package kalbe.corp.genexsupabasepoc.data
 
 import android.util.Log
-import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kalbe.corp.genexsupabasepoc.models.Wishlist
 
-class WishlistRepository(private val supabaseClient: SupabaseClient) {
+class WishlistRepository() {
     suspend fun getWishlists(sessionID: String): List<Wishlist> {
         return try {
             val result = supabaseClient
