@@ -99,11 +99,11 @@ fun ResetPasswordScreen(
                             password = newPassword
                         }
 
-                        supabaseClient.from("auth").update({
+                        supabaseClient.from("users").update({
                             set("is_first_time_login", false)
                         }) {
                             filter {
-                                eq("user_id", user.id)
+                                eq("account_id", user.id)
                             }
                         }
 
@@ -111,9 +111,8 @@ fun ResetPasswordScreen(
 
                     } catch (e: Exception) {
                         errorMessage = "Failed to reset password: ${e.message}"
+                        Log.e("ErrorMessage", errorMessage.toString())
                     }
-
-                    Log.e("ErrorMessage", errorMessage.toString())
                 }
             },
             modifier = Modifier.fillMaxWidth(),
