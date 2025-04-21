@@ -28,7 +28,7 @@ interface ProfilePreferencesRepository {
 }
 
 class ProfilePreferencesRepositoryImpl(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
 ) : ProfilePreferencesRepository {
     private companion object {
         val SELECTED_PROFILE_ID_KEY = stringPreferencesKey("selected_profile_id")

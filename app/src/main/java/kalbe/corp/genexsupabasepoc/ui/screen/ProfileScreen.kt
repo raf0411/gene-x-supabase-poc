@@ -18,10 +18,15 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.outlined.Accessibility
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Fastfood
+import androidx.compose.material.icons.outlined.Height
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.LocalDrink
 import androidx.compose.material.icons.outlined.MedicalInformation
+import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Scale
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.CircularProgressIndicator
@@ -52,6 +57,7 @@ import kalbe.corp.genexsupabasepoc.navigation.Routes
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileBanner
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileButtonItem
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileHeaderToggle
+import kalbe.corp.genexsupabasepoc.ui.components.ProfileInfoItem
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileSelectionContent
 import kalbe.corp.genexsupabasepoc.viewModel.ProfileViewModel
 import kalbe.corp.genexsupabasepoc.viewModel.ProfileViewModelFactory
@@ -167,6 +173,42 @@ fun ProfileScreen(
                     )
                 }
             }
+
+            ProfileHeaderToggle(
+                headerText = "Personal Information",
+            )
+
+            ProfileInfoItem(
+                infoText = "Height (cm)",
+                infoValueText = "${selectedProfile?.height}",
+                icon = Icons.Outlined.Height,
+            )
+
+            ProfileInfoItem(
+                infoText = "Weight (kg)",
+                infoValueText = "${selectedProfile?.weight}",
+                icon = Icons.Outlined.Scale,
+            )
+
+            ProfileInfoItem(
+                infoText = "Calories (kkal)",
+                infoValueText = "${selectedProfile?.calories}",
+                icon = Icons.Outlined.Fastfood,
+            )
+
+            ProfileInfoItem(
+                infoText = "Max Heart Rate (bpm)",
+                infoValueText = "${selectedProfile?.max_heart_rate}",
+                icon = Icons.Outlined.MonitorHeart,
+            )
+
+            ProfileInfoItem(
+                infoText = "Protein Intake (g)",
+                infoValueText = "${selectedProfile?.protein_intake}",
+                icon = Icons.Outlined.LocalDrink,
+            )
+
+            Spacer(Modifier.height(16.dp))
 
             ProfileHeaderToggle(
                 headerText = "Account",
