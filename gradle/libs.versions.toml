@@ -1,18 +1,17 @@
 [versions]
 agp = "8.9.1"
+datastorePreferences = "1.1.4"
 fragmentKtx = "1.8.6"
 gotrueKt = "2.5.2"
-hiltAndroid = "2.50"
-hiltLifecycleViewmodel = "1.0.0-alpha03"
 kotlin = "2.1.10"
-coreKtx = "1.15.0"
+coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-ktorClientAndroidVersion = "3.1.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2025.03.01"
+composeBom = "2025.04.00"
+lifecycleViewmodelCompose = "2.8.7"
 material = "1.12.0"
 appcompat = "1.7.0"
 constraintlayout = "2.2.1"
@@ -23,7 +22,6 @@ ktorClientAndroid = "3.1.1"
 navigationCompose = "2.8.9"
 coilCompose = "2.7.0"
 kotlinxSerializationJson = "1.8.0"
-
 googleid = "1.1.1"
 credentials = "1.5.0"
 ktor = "3.0.3"
@@ -32,6 +30,8 @@ supabase = "3.1.2"
 [libraries]
 
 # Supabase
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 auth-kt = { module = "io.github.jan-tennert.supabase: auth-kt" }
 gotrue-kt = { module = "io.github.jan-tennert.supabase:gotrue-kt", version.ref = "gotrueKt" }
@@ -39,12 +39,9 @@ ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 realtime-kt = { module = "io.github.jan-tennert.supabase: realtime-kt" }
 supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabase" }
 postgrest-kt = {module = "io.github.jan-tennert.supabase: postgrest-kt" }
-
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
-androidx-hilt-lifecycle-viewmodel = { module = "androidx.hilt:hilt-lifecycle-viewmodel", version.ref = "hiltLifecycleViewmodel" }
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

@@ -73,6 +73,8 @@ dependencies {
     implementation (libs.kotlinx.serialization.json)
     implementation(libs.gotrue.kt)
 
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)
     implementation(libs.ktor.client.android)
@@ -99,8 +101,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.lifecycle.viewmodel)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.fragment.ktx)
 }

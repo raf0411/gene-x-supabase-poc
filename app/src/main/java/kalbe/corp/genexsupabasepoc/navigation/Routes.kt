@@ -23,6 +23,9 @@ sealed class Routes {
     data object ResetPasswordScreen : Routes()
 
     @Serializable
+    data object DashboardScreen : Routes()
+
+    @Serializable
     data object ProfileScreen : Routes()
 
     @Serializable

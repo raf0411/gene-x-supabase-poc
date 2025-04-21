@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,7 +27,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kalbe.corp.genexsupabasepoc.R
@@ -35,6 +35,7 @@ import kalbe.corp.genexsupabasepoc.models.Profile
 @Composable
 fun ProfileItem(
     profile: Profile,
+    isSelected: Boolean,
     onProfileClick: () -> Unit,
 ){
     Box(
@@ -43,7 +44,7 @@ fun ProfileItem(
             .border(
                 width = 1.dp,
                 color = Color.LightGray,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
             )
             .background(Color.White, shape = RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
@@ -68,39 +69,29 @@ fun ProfileItem(
 
                 Column() {
                     Text(text = profile.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text(text = "Male, 23")
+                    Text(text = "${profile.gender}, ${profile.age}")
                 }
             }
 
-            IconButton(
-                onClick = {onProfileClick},
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = null,
-                )
+                if (isSelected){
+                    Icon(Icons.Filled.Check, contentDescription = "Selected", tint = Color.Green )
+                }
+
+                Spacer(Modifier.width(4.dp))
+
+                IconButton(
+                    onClick = {onProfileClick()},
+                ) {
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                    )
+                }
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProfileItemPreview(){
-    val profile: Profile = Profile(
-        id = "1",
-        name = "Raffi",
-        nutrition = "Needed",
-        calories = 12,
-        max_heart_rate = 15,
-        protein_take = 15f,
-        weight = 80.0f,
-        height = 168.0f,
-    )
-
-    ProfileItem(
-        profile = profile,
-        onProfileClick = {},
-    )
 }
