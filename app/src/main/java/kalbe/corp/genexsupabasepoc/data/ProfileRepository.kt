@@ -31,17 +31,4 @@ class ProfileRepository {
             emptyList()
         }
     }
-
-    suspend fun getCurrentUserProfile(id: String): Profile?{
-        return try {
-            supabaseClient.from("profiles").select() {
-                filter {
-                    Profile::id eq id
-                }
-            }.decodeSingle<Profile>()
-        } catch (e: Exception) {
-            Log.e("SupabaseError", "Error fetching Profile by ID: $id", e)
-            null
-        }
-    }
 }

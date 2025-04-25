@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import kalbe.corp.genexsupabasepoc.data.AuthRepository
 import kalbe.corp.genexsupabasepoc.data.ProductRepository
 import kalbe.corp.genexsupabasepoc.data.ProfilePreferencesRepositoryImpl
@@ -12,37 +16,63 @@ import kalbe.corp.genexsupabasepoc.data.UserRepository
 import kalbe.corp.genexsupabasepoc.data.WishlistRepository
 import kalbe.corp.genexsupabasepoc.data.profileDataStore
 import kalbe.corp.genexsupabasepoc.navigation.NavGraph
+import kalbe.corp.genexsupabasepoc.navigation.Routes
 import kalbe.corp.genexsupabasepoc.ui.theme.GeneXSupabasePOCTheme
 import kalbe.corp.genexsupabasepoc.viewModel.ProfileViewModelFactory
 
 class MainActivity : ComponentActivity() {
+    private val context = this
     private val dataStore by lazy { applicationContext.profileDataStore }
     private val profilePreferencesRepository by lazy { ProfilePreferencesRepositoryImpl(dataStore) }
     private val userRepository by lazy { UserRepository() }
     private val profileRepository by lazy { ProfileRepository() }
     private val productRepository by lazy { ProductRepository() }
     private val wishlistRepository by lazy { WishlistRepository() }
-    private val authRepository by lazy { AuthRepository() }
+    private val authRepository by lazy { AuthRepository(context = context) }
 
     private val profileViewModelFactory by lazy {
         ProfileViewModelFactory(
             profileRepository = profileRepository,
             userRepository = userRepository,
-            profilePreferencesRepository = profilePreferencesRepository
+            profilePreferencesRepository = profilePreferencesRepository,
         )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+        var keepOn = true
+        splashScreen.setKeepOnScreenCondition { keepOn }
+
         super.onCreate(savedInstanceState)
         setContent {
             GeneXSupabasePOCTheme {
-                MyApp(
-                    profileViewModelFactory,
-                    productRepository = productRepository,
-                    wishlistRepository = wishlistRepository,
-                    authRepository = authRepository,
-                    userRepository = userRepository,
-                )
+                val authReady = remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    val ok = authRepository.restoreSession()
+                    keepOn = false
+                    authReady.value = ok
+                }
+
+                if (authReady.value) {
+                    MyApp(
+                        profileViewModelFactory = profileViewModelFactory,
+                        productRepository = productRepository,
+                        wishlistRepository = wishlistRepository,
+                        authRepository = authRepository,
+                        userRepository = userRepository,
+                        startDestination = Routes.DashboardScreen,
+                    )
+                } else {
+                    MyApp(
+                        profileViewModelFactory = profileViewModelFactory,
+                        productRepository = productRepository,
+                        wishlistRepository = wishlistRepository,
+                        authRepository = authRepository,
+                        userRepository = userRepository,
+                        startDestination = Routes.LoginScreen,
+                    )
+                }
             }
         }
     }
@@ -55,6 +85,7 @@ fun MyApp(
     wishlistRepository: WishlistRepository,
     authRepository: AuthRepository,
     userRepository: UserRepository,
+    startDestination: Routes
 ) {
     NavGraph(
         profileViewModelFactory = profileViewModelFactory,
@@ -62,5 +93,6 @@ fun MyApp(
         wishlistRepository = wishlistRepository,
         authRepository = authRepository,
         userRepository = userRepository,
+        startDestination = startDestination,
     )
 }

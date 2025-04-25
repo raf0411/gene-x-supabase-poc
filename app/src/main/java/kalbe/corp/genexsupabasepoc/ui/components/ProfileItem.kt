@@ -1,6 +1,5 @@
 package kalbe.corp.genexsupabasepoc.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,11 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kalbe.corp.genexsupabasepoc.R
+import coil.compose.AsyncImage
 import kalbe.corp.genexsupabasepoc.models.Profile
 
 @Composable
@@ -59,15 +57,15 @@ fun ProfileItem(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ){
-                Image(
+                AsyncImage(
                     modifier = Modifier.width(50.dp),
-                    painter = painterResource(id = R.drawable.user_profile),
+                    model = profile.profile_image,
                     contentDescription = null,
                 )
 
                 Spacer(Modifier.width(8.dp))
 
-                Column() {
+                Column {
                     Text(text = profile.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     Text(text = "${profile.gender}, ${profile.age}")
                 }

@@ -32,10 +32,11 @@ fun NavGraph(
     wishlistRepository: WishlistRepository,
     authRepository: AuthRepository,
     userRepository: UserRepository,
+    startDestination: Routes
 ) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Routes.LoginScreen) {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable<Routes.DashboardScreen> {
             DashboardScreen(
                 navController = navController,
@@ -103,6 +104,7 @@ fun NavGraph(
             ProfileScreen(
                 navController = navController,
                 userRepository = userRepository,
+                authRepository = authRepository,
                 profileViewModelFactory = profileViewModelFactory,
             )
         }

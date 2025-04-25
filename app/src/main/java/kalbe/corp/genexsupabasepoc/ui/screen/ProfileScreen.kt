@@ -2,6 +2,7 @@ package kalbe.corp.genexsupabasepoc.ui.screen
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,14 +45,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import kalbe.corp.genexsupabasepoc.data.AuthRepository
 import kalbe.corp.genexsupabasepoc.data.UserRepository
 import kalbe.corp.genexsupabasepoc.navigation.Routes
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileBanner
@@ -61,6 +65,7 @@ import kalbe.corp.genexsupabasepoc.ui.components.ProfileInfoItem
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileSelectionContent
 import kalbe.corp.genexsupabasepoc.viewModel.ProfileViewModel
 import kalbe.corp.genexsupabasepoc.viewModel.ProfileViewModelFactory
+import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,8 +73,11 @@ import kalbe.corp.genexsupabasepoc.viewModel.ProfileViewModelFactory
 fun ProfileScreen(
     navController: NavController,
     userRepository: UserRepository,
+    authRepository: AuthRepository,
     profileViewModelFactory: ProfileViewModelFactory,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val context =LocalContext.current
     val viewModel: ProfileViewModel = viewModel(factory = profileViewModelFactory)
 
     val sheetState = rememberModalBottomSheetState()
@@ -109,7 +117,13 @@ fun ProfileScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = { navController.navigate(Routes.DashboardScreen) },
+                        onClick = {
+                            coroutineScope.launch {
+                                authRepository.logout()
+                                Toast.makeText(context, "User Logged Out", Toast.LENGTH_SHORT).show()
+                                navController.navigate(Routes.LoginScreen)
+                            }
+                        },
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,

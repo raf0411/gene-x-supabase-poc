@@ -1,5 +1,6 @@
 package kalbe.corp.genexsupabasepoc.data
 
+import android.content.Context
 import android.util.Log
 import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
@@ -7,8 +8,13 @@ import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.OTP
 import io.github.jan.supabase.postgrest.from
 import kalbe.corp.genexsupabasepoc.models.UserProfile
+import kalbe.corp.genexsupabasepoc.sessions.SecurePrefs
 
-class AuthRepository {
+class AuthRepository(
+    private val context: Context,
+) {
+    private val securePrefs = SecurePrefs(context)
+
     suspend fun sendOtpToPhone(phone: String): Boolean {
         try {
             val formattedPhone = if (phone.startsWith("+")) {
@@ -53,18 +59,27 @@ class AuthRepository {
 
     suspend fun loginUser(email: String, password: String): Boolean {
         try {
-            val session = supabaseClient.auth.signInWith(Email) {
+            val result = supabaseClient.auth.signInWith(Email) {
                 this.email = email
                 this.password = password
             }
 
-            val userId = supabaseClient.auth.currentUserOrNull()?.id
+            val currentUser = supabaseClient.auth.currentUserOrNull()
+            val currentSession = supabaseClient.auth.currentSessionOrNull()
+
+            // Persisting tokens securely here
+            securePrefs.putEncrypted("access_token", currentSession?.accessToken.toString())
+            securePrefs.putEncrypted("refresh_token", currentSession?.refreshToken.toString())
+            securePrefs.putEncrypted("expires_at", currentSession?.expiresAt.toString())
+
+            val authId = currentUser?.id
                 ?: throw Exception("User not logged in")
 
+            // Getting user from table "users"
             val user = supabaseClient.from("users")
                 .select {
                     filter {
-                        eq("account_id", userId)
+                        eq("account_id", authId)
                     }
                 }
                 .decodeSingle<UserProfile>()
@@ -75,5 +90,25 @@ class AuthRepository {
             e.printStackTrace()
             throw e
         }
+    }
+
+    suspend fun restoreSession(): Boolean {
+        val refreshToken = securePrefs.getDecrypted("refresh_token") ?: return false
+        return try {
+            val newSession = supabaseClient.auth.refreshSession(refreshToken)
+
+            securePrefs.putEncrypted("access_token", newSession.accessToken)
+            securePrefs.putEncrypted("refresh_token", newSession.refreshToken)
+            securePrefs.putEncrypted("expires_at", newSession.expiresAt.toString())
+            true
+        } catch (e: Exception) {
+            securePrefs.clear()
+            false
+        }
+    }
+
+    suspend fun logout() {
+        supabaseClient.auth.signOut()
+        securePrefs.clear()
     }
 }
