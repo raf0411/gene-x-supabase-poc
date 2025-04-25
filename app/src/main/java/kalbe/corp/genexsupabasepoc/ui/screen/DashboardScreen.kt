@@ -42,6 +42,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,8 +66,19 @@ fun DashboardScreen(
     navController: NavController,
     profileViewModelFactory: ProfileViewModelFactory,
 ) {
-    val viewModel: ProfileViewModel = viewModel(factory = profileViewModelFactory)
+    val navGraphRoute = Routes.DashboardScreen
+
+    val parentEntry = remember(navController.currentBackStackEntry) {
+        navController.getBackStackEntry(navGraphRoute)
+    }
+
+    val viewModel: ProfileViewModel = viewModel(
+        viewModelStoreOwner = parentEntry,
+        factory = profileViewModelFactory
+    )
+
     val selectedProfile by viewModel.selectedProfile.collectAsState()
+
 
     Scaffold(
         topBar = {

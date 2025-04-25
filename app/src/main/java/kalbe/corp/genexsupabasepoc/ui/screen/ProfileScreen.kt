@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import kalbe.corp.genexsupabasepoc.data.AuthRepository
 import kalbe.corp.genexsupabasepoc.data.UserRepository
 import kalbe.corp.genexsupabasepoc.navigation.Routes
@@ -77,13 +78,21 @@ fun ProfileScreen(
     profileViewModelFactory: ProfileViewModelFactory,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val context =LocalContext.current
-    val viewModel: ProfileViewModel = viewModel(factory = profileViewModelFactory)
+    val context = LocalContext.current
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val navGraphRoute = Routes.DashboardScreen
+    val parentEntry = remember(navController.currentBackStackEntry) {
+        navController.getBackStackEntry(navGraphRoute)
+    }
+    val viewModel: ProfileViewModel = viewModel(
+        viewModelStoreOwner = parentEntry,
+        factory = profileViewModelFactory
+    )
 
     val selectedProfile by viewModel.selectedProfile.collectAsState()
     val availableProfiles by viewModel.availableProfiles.collectAsState()
@@ -120,8 +129,14 @@ fun ProfileScreen(
                         onClick = {
                             coroutineScope.launch {
                                 authRepository.logout()
-                                Toast.makeText(context, "User Logged Out", Toast.LENGTH_SHORT).show()
-                                navController.navigate(Routes.LoginScreen)
+                            }
+
+                            Toast.makeText(context, "User Logged Out", Toast.LENGTH_SHORT).show()
+                            navController.navigate(Routes.LoginScreen){
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
                             }
                         },
                     ) {

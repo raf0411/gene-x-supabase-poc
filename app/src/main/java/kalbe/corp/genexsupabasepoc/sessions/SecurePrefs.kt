@@ -51,6 +51,7 @@ class SecurePrefs(context: Context) {
         return try {
             cipher.doFinal(cipherBytes).toString(Charsets.UTF_8)
         } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }

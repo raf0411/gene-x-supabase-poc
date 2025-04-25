@@ -83,7 +83,7 @@ fun NavGraph(
                     if (isFirstTimeLogin) {
                         navController.navigate(Routes.ResetPasswordScreen)
                     } else {
-                        navController.navigate(Routes.ProfileScreen)
+                        navController.navigate(startDestination)
                     }
                 },
                 email = screen.email,
@@ -95,7 +95,7 @@ fun NavGraph(
                 supabaseClient = supabaseClient,
                 onResetSuccess = {
                     Log.d("SuccessLogin", "Login Successful!")
-                    navController.navigate(Routes.ProfileScreen)
+                    navController.navigate(startDestination)
                 },
             )
         }

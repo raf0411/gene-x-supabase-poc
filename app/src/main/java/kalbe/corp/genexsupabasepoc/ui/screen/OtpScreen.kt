@@ -100,7 +100,7 @@ fun OtpScreen(
                         if (success) {
                             Log.d("OtpScreen", "OTP verified successfully. Navigating to Profile.")
                             Toast.makeText(context, "Verification Successful!", Toast.LENGTH_SHORT).show()
-                            navController.navigate(Routes.ProfileScreen) {
+                            navController.navigate(Routes.DashboardScreen) {
                                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
                             }
                         } else {
