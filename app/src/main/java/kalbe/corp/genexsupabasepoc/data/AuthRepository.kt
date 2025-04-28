@@ -11,7 +11,7 @@ import kalbe.corp.genexsupabasepoc.models.UserProfile
 import kalbe.corp.genexsupabasepoc.sessions.SecurePrefs
 
 class AuthRepository(
-    private val context: Context,
+    context: Context,
 ) {
     private val securePrefs = SecurePrefs(context)
 
