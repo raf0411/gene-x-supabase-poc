@@ -59,7 +59,7 @@ class AuthRepository(
 
     suspend fun loginUser(email: String, password: String): Boolean {
         try {
-            val result = supabaseClient.auth.signInWith(Email) {
+            supabaseClient.auth.signInWith(Email) {
                 this.email = email
                 this.password = password
             }
@@ -94,14 +94,19 @@ class AuthRepository(
 
     suspend fun restoreSession(): Boolean {
         val refreshToken = securePrefs.getDecrypted("refresh_token") ?: return false
+
+        Log.d("RefreshToken", "Before Refresh Token: $refreshToken")
+
         return try {
             val newSession = supabaseClient.auth.refreshSession(refreshToken)
+            Log.d("RefreshToken", "After Refresh Token: ${newSession.refreshToken}")
 
             securePrefs.putEncrypted("access_token", newSession.accessToken)
             securePrefs.putEncrypted("refresh_token", newSession.refreshToken)
             securePrefs.putEncrypted("expires_at", newSession.expiresAt.toString())
             true
         } catch (e: Exception) {
+            e.printStackTrace()
             securePrefs.clear()
             false
         }
