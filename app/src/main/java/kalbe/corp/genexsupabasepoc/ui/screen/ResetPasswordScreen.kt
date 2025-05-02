@@ -53,12 +53,6 @@ fun ResetPasswordScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-//        Text(
-//            text = "Please enter your email and we will send an OTP code in the next step to reset your password",
-//            fontSize = 14.sp,
-//            fontWeight = FontWeight.Normal,
-//        )
-
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(

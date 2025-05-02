@@ -1,6 +1,5 @@
 package kalbe.corp.genexsupabasepoc.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -83,7 +82,7 @@ fun NavGraph(
                     if (isFirstTimeLogin) {
                         navController.navigate(Routes.ResetPasswordScreen)
                     } else {
-                        navController.navigate(startDestination)
+                        navController.navigate(Routes.DashboardScreen)
                     }
                 },
                 email = screen.email,
@@ -94,8 +93,7 @@ fun NavGraph(
             ResetPasswordScreen(
                 supabaseClient = supabaseClient,
                 onResetSuccess = {
-                    Log.d("SuccessLogin", "Login Successful!")
-                    navController.navigate(startDestination)
+                    navController.navigate(Routes.DashboardScreen)
                 },
             )
         }

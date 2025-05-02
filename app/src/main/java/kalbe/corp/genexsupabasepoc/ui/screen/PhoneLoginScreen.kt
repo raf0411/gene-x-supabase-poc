@@ -93,8 +93,6 @@ fun PhoneLoginScreen(
                 Button(
                     onClick = {
                         coroutineScope.launch {
-//                            authRepository.signUpPhoneUser(phone)
-
                             val success = authRepository.sendOtpToPhone(phone)
 
                             if (success) {
