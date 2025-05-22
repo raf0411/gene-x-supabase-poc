@@ -1,4 +1,4 @@
-package kalbe.corp.genexsupabasepoc.data
+package kalbe.corp.genexsupabasepoc.data.network
 
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.Auth

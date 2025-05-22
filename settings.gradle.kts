@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "GeneXSupabasePOC"
 include(":app")
+include(":components")

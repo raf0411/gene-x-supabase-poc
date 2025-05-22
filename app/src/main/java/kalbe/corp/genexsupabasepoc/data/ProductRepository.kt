@@ -3,6 +3,7 @@ package kalbe.corp.genexsupabasepoc.data
 import android.util.Log
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
+import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kalbe.corp.genexsupabasepoc.models.Product
 
 class ProductRepository() {

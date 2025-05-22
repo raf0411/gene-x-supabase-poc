@@ -1,4 +1,4 @@
-package kalbe.corp.genexsupabasepoc.sessions
+package kalbe.corp.genexsupabasepoc.utils
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties

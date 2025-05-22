@@ -28,7 +28,7 @@ import io.github.jan.supabase.auth.auth
 import kalbe.corp.genexsupabasepoc.data.ProductRepository
 import kalbe.corp.genexsupabasepoc.data.WishlistRepository
 import kalbe.corp.genexsupabasepoc.data.WishlistService
-import kalbe.corp.genexsupabasepoc.data.supabaseClient
+import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kalbe.corp.genexsupabasepoc.models.Wishlist
 import kalbe.corp.genexsupabasepoc.ui.components.NavBar
 import kalbe.corp.genexsupabasepoc.ui.components.WishlistItem

@@ -31,7 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import io.github.jan.supabase.auth.auth
 import kalbe.corp.genexsupabasepoc.data.WishlistService
-import kalbe.corp.genexsupabasepoc.data.supabaseClient
+import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kalbe.corp.genexsupabasepoc.models.Wishlist
 import kotlinx.coroutines.launch
 

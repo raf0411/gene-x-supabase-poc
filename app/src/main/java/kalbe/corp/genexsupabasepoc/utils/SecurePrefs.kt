@@ -1,4 +1,4 @@
-package kalbe.corp.genexsupabasepoc.sessions
+package kalbe.corp.genexsupabasepoc.utils
 
 import android.content.Context
 import android.util.Base64

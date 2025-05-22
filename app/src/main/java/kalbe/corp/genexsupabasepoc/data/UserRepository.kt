@@ -4,6 +4,7 @@ import android.util.Log
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
+import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kalbe.corp.genexsupabasepoc.models.Account
 import kalbe.corp.genexsupabasepoc.models.UserProfile
 

@@ -9,7 +9,7 @@ import kalbe.corp.genexsupabasepoc.data.AuthRepository
 import kalbe.corp.genexsupabasepoc.data.ProductRepository
 import kalbe.corp.genexsupabasepoc.data.UserRepository
 import kalbe.corp.genexsupabasepoc.data.WishlistRepository
-import kalbe.corp.genexsupabasepoc.data.supabaseClient
+import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kalbe.corp.genexsupabasepoc.ui.screen.DashboardScreen
 import kalbe.corp.genexsupabasepoc.ui.screen.EmailLoginScreen
 import kalbe.corp.genexsupabasepoc.ui.screen.LoginScreen

@@ -21,11 +21,12 @@ android {
 
     defaultConfig {
         applicationId = "kalbe.corp.genexsupabasepoc"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -58,10 +59,8 @@ android {
 }
 
 dependencies {
-    // Google
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.googleid)
+    implementation(project(":components"))
+    implementation (libs.androidx.multidex)
 
     // Supabase
     implementation (platform (libs.supabase.bom))

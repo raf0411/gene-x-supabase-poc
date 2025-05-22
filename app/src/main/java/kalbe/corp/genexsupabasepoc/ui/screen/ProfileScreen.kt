@@ -1,9 +1,7 @@
 package kalbe.corp.genexsupabasepoc.ui.screen
 
-import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,12 +32,17 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,10 +52,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -66,9 +71,9 @@ import kalbe.corp.genexsupabasepoc.ui.components.ProfileInfoItem
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileSelectionContent
 import kalbe.corp.genexsupabasepoc.viewModel.ProfileViewModel
 import kalbe.corp.genexsupabasepoc.viewModel.ProfileViewModelFactory
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -77,18 +82,22 @@ fun ProfileScreen(
     authRepository: AuthRepository,
     profileViewModelFactory: ProfileViewModelFactory,
 ) {
+    val tag = "ProfileScreen"
+
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-
-    val sheetState = rememberModalBottomSheetState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
-    var email by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var email by remember { mutableStateOf<String?>(null) }
 
     val navGraphRoute = Routes.DashboardScreen
+
     val parentEntry = remember(navController.currentBackStackEntry) {
         navController.getBackStackEntry(navGraphRoute)
     }
+
     val viewModel: ProfileViewModel = viewModel(
         viewModelStoreOwner = parentEntry,
         factory = profileViewModelFactory
@@ -96,18 +105,53 @@ fun ProfileScreen(
 
     val selectedProfile by viewModel.selectedProfile.collectAsState()
     val availableProfiles by viewModel.availableProfiles.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = userRepository) {
         try {
-            val currentUserEmail = userRepository.getUserAccount()?.email
-            email = currentUserEmail.toString()
+            email = userRepository.getUserAccount()?.email
         } catch (e: Exception) {
-            Log.e("ProfileScreenError", "Failed to fetch email", e)
-            errorMessage = "Failed to load profiles: ${e.message}"
+            Log.e(tag, "Failed to fetch email", e)
+        }
+    }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { msg ->
+            Log.d(tag, "Showing error snackbar: $msg")
+            snackbarHostState.showSnackbar(message = msg, duration = SnackbarDuration.Short)
+        }
+    }
+
+    LaunchedEffect(key1 = viewModel, key2 = navController) {
+        viewModel.navigateToLogin.collectLatest {
+            Log.i(tag, "NavigateToLogin event received from ViewModel. Navigating to Login.")
+            Toast.makeText(context, "Session expired, logging out...", Toast.LENGTH_LONG).show()
+
+            navController.navigate(Routes.LoginScreen) {
+                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                Log.d(tag, "Lifecycle ON_RESUME: Triggering ProfileViewModel.loadInitialData()")
+                viewModel.loadInitialData()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            Log.d(tag,"DisposableEffect onDispose: Removing lifecycle observer.")
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(text = "Profile", fontWeight = FontWeight.Normal) },
@@ -115,11 +159,13 @@ fun ProfileScreen(
                     IconButton(onClick = {
                         if (navController.previousBackStackEntry != null) {
                             navController.popBackStack()
+                        } else {
+                            Log.w(tag, "No previous back stack entry to pop.")
                         }
                     }) {
                         Icon(
                             Icons.Filled.ChevronLeft,
-                            contentDescription = "Left Arrow",
+                            contentDescription = "Back",
                             modifier = Modifier.size(32.dp),
                         )
                     }
@@ -127,22 +173,27 @@ fun ProfileScreen(
                 actions = {
                     IconButton(
                         onClick = {
+                            Log.d(tag, "Manual logout button clicked.")
                             coroutineScope.launch {
-                                authRepository.logout()
-                            }
+                                try {
+                                    authRepository.logout()
+                                    Toast.makeText(context, "Logged Out", Toast.LENGTH_SHORT).show()
 
-                            Toast.makeText(context, "User Logged Out", Toast.LENGTH_SHORT).show()
-                            navController.navigate(Routes.LoginScreen){
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    inclusive = true
+                                    navController.navigate(Routes.LoginScreen) {
+                                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+
+                                } catch (e: Exception) {
+                                    Log.e(tag, "Error during manual logout", e)
+                                    Toast.makeText(context, "Logout failed: ${e.message}", Toast.LENGTH_SHORT).show()
                                 }
-                                launchSingleTop = true
                             }
                         },
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Exit",
+                            contentDescription = "Logout",
                         )
                     }
                 })
@@ -153,7 +204,7 @@ fun ProfileScreen(
             ModalBottomSheet(
                 onDismissRequest = { showBottomSheet = false },
                 sheetState = sheetState,
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
             ) {
                 ProfileSelectionContent(
                     onProfileClick = { profileId ->
@@ -161,138 +212,86 @@ fun ProfileScreen(
                         showBottomSheet = false
                     },
                     onCloseClick = { showBottomSheet = false },
-                    onAddAccountClick = {},
+                    onAddAccountClick = { /* TODO: Implement Add Account */ },
                     profiles = availableProfiles,
                     selectedProfileId = selectedProfile?.id.toString(),
                 )
             }
         }
 
+        // --- Main Screen Content ---
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center,
         ) {
-            when (selectedProfile?.name){
-                null -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = Color.Black,
-                            strokeWidth = 4.dp
-                        )
-                    }
-                }
-                else -> {
-                    ProfileBanner(
-                        profileImage = selectedProfile?.profile_image.toString(),
-                        profileName = selectedProfile?.name ?: "No Name",
-                        profileEmail = email,
-                        profilePhone = "No Phone",
-                        profileGender = selectedProfile?.gender ?: "Unknown",
-                        profileAge = selectedProfile?.age ?: 0,
-                        onSwitchAccountClick = {
-                            showBottomSheet = true
-                        },
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 64.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 4.dp
                     )
                 }
+            } else if (selectedProfile != null) {
+                ProfileBanner(
+                    profileImage = selectedProfile?.profile_image.toString(),
+                    profileName = selectedProfile?.name ?: "N/A",
+                    profileEmail = email ?: "...",
+                    profilePhone = "N/A",
+                    profileGender = selectedProfile?.gender ?: "N/A",
+                    profileAge = selectedProfile?.age ?: 0,
+                    onSwitchAccountClick = {
+                        if (availableProfiles.size > 1) {
+                            showBottomSheet = true
+                        } else {
+                            Toast.makeText(context, "No other profiles to switch to.", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                )
+
+                // --- Sections ---
+                ProfileHeaderToggle(headerText = "Personal Information")
+                ProfileInfoItem( infoText = "Height (cm)", infoValueText = "${selectedProfile?.height ?: "N/A"}", icon = Icons.Outlined.Height)
+                ProfileInfoItem( infoText = "Weight (kg)", infoValueText = "${selectedProfile?.weight ?: "N/A"}", icon = Icons.Outlined.Scale)
+                ProfileInfoItem( infoText = "Calories (kkal)", infoValueText = "${selectedProfile?.calories ?: "N/A"}", icon = Icons.Outlined.Fastfood)
+                ProfileInfoItem( infoText = "Max Heart Rate (bpm)", infoValueText = "${selectedProfile?.max_heart_rate ?: "N/A"}", icon = Icons.Outlined.MonitorHeart)
+                ProfileInfoItem( infoText = "Protein Intake (g)", infoValueText = "${selectedProfile?.protein_intake ?: "N/A"}", icon = Icons.Outlined.LocalDrink)
+
+                Spacer(Modifier.height(16.dp))
+
+                ProfileHeaderToggle(headerText = "Account")
+                ProfileButtonItem(text = "Profile", icon = Icons.Outlined.Person)
+                ProfileButtonItem(text = "Medical Profile", icon = Icons.Outlined.MedicalInformation)
+                ProfileButtonItem(text = "Reminder", icon = Icons.Outlined.Timer)
+                ProfileButtonItem(text = "Language", icon = Icons.Outlined.TextFields)
+                ProfileButtonItem(text = "Timezone", icon = Icons.Outlined.Language)
+                ProfileButtonItem(text = "Accessibility", icon = Icons.Outlined.Accessibility)
+
+                Spacer(Modifier.height(16.dp))
+
+                ProfileHeaderToggle(headerText = "General")
+                ProfileButtonItem(text = "About AI", icon = Icons.Outlined.ChatBubbleOutline)
+                ProfileButtonItem(text = "About Us", icon = Icons.Outlined.Info)
+                ProfileButtonItem(text = "Terms of Services", icon = Icons.Outlined.Description)
+
+                Spacer(Modifier.height(16.dp))
+
+            } else {
+                if (errorMessage == null) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No profile data available.")
+                    }
+                }
             }
-
-            ProfileHeaderToggle(
-                headerText = "Personal Information",
-            )
-
-            ProfileInfoItem(
-                infoText = "Height (cm)",
-                infoValueText = "${selectedProfile?.height}",
-                icon = Icons.Outlined.Height,
-            )
-
-            ProfileInfoItem(
-                infoText = "Weight (kg)",
-                infoValueText = "${selectedProfile?.weight}",
-                icon = Icons.Outlined.Scale,
-            )
-
-            ProfileInfoItem(
-                infoText = "Calories (kkal)",
-                infoValueText = "${selectedProfile?.calories}",
-                icon = Icons.Outlined.Fastfood,
-            )
-
-            ProfileInfoItem(
-                infoText = "Max Heart Rate (bpm)",
-                infoValueText = "${selectedProfile?.max_heart_rate}",
-                icon = Icons.Outlined.MonitorHeart,
-            )
-
-            ProfileInfoItem(
-                infoText = "Protein Intake (g)",
-                infoValueText = "${selectedProfile?.protein_intake}",
-                icon = Icons.Outlined.LocalDrink,
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            ProfileHeaderToggle(
-                headerText = "Account",
-            )
-
-            ProfileButtonItem(
-                text = "Profile",
-                icon = Icons.Outlined.Person,
-            )
-
-            ProfileButtonItem(
-                text = "Medical Profile",
-                icon = Icons.Outlined.MedicalInformation,
-            )
-
-            ProfileButtonItem(
-                text = "Reminder",
-                icon = Icons.Outlined.Timer,
-            )
-
-            ProfileButtonItem(
-                text = "Language",
-                icon = Icons.Outlined.TextFields,
-            )
-
-            ProfileButtonItem(
-                text = "Timezone",
-                icon = Icons.Outlined.Language,
-            )
-
-            ProfileButtonItem(
-                text = "Accessibility",
-                icon = Icons.Outlined.Accessibility,
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            ProfileHeaderToggle(
-                headerText = "General",
-            )
-
-            ProfileButtonItem(
-                text = "About AI",
-                icon = Icons.Outlined.ChatBubbleOutline,
-            )
-
-            ProfileButtonItem(
-                text = "About Us",
-                icon = Icons.Outlined.Info,
-            )
-
-            ProfileButtonItem(
-                text = "Terms of Services",
-                icon = Icons.Outlined.Description,
-            )
         }
     }
 }

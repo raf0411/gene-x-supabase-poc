@@ -1,6 +1,7 @@
 package kalbe.corp.genexsupabasepoc.data
 
 import io.github.jan.supabase.postgrest.from
+import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kalbe.corp.genexsupabasepoc.models.Product
 
 class ProductService {

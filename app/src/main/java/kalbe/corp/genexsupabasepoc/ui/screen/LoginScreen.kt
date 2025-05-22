@@ -1,6 +1,7 @@
 package kalbe.corp.genexsupabasepoc.ui.screen
 
 import android.util.Log
+import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,9 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,14 +23,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.dynamiclayer.components.button.Button
+import com.dynamiclayer.components.inputField.InputField
+import com.dynamiclayer.components.inputField.util.InputFieldSize
+import com.dynamiclayer.components.inputField.util.InputFieldState
+import com.dynamiclayer.components.inputField.util.InputFieldType
 import kalbe.corp.genexsupabasepoc.R
 import kalbe.corp.genexsupabasepoc.data.AuthRepository
 import kalbe.corp.genexsupabasepoc.navigation.Routes
@@ -43,10 +46,13 @@ fun LoginScreen(
     authRepository: AuthRepository,
     navController: NavController,
 ){
-    var loginField by remember { mutableStateOf("") }
+    var loginField by remember { mutableStateOf(TextFieldValue("")) }
+    var loginFieldType by remember { mutableStateOf(InputFieldType.default) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     fun isEmail(input: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(input).matches()
+        return Patterns.EMAIL_ADDRESS.matcher(input).matches()
     }
 
     fun isPhone(input: String): Boolean {
@@ -80,39 +86,48 @@ fun LoginScreen(
                     .fillMaxWidth()
             ) {
                 Text(text = "Email/Phone", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                OutlinedTextField(
-                    value = loginField,
-                    onValueChange = { loginField = it },
-                    label = { Text("Enter your email/phone") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(32.dp),
+
+                Spacer(Modifier.height(16.dp))
+
+                InputField(
+                    size = InputFieldSize.lg,
+                    onValueChange = {
+                        loginField = it
+                    },
+                    errorText = errorMessage,
+                    placeholder = "Enter your email/phone",
+                    type = loginFieldType,
+                    text = loginField,
+                    state = InputFieldState.default,
                 )
 
                 Spacer(Modifier.height(16.dp))
 
-                val coroutineScope = rememberCoroutineScope()
-                var errorMessage by remember { mutableStateOf<String?>(null) }
-
                 Button(
+                    label = "Login",
                     onClick = {
                         coroutineScope.launch {
+                            val loginString = loginField.text
+
                             try {
-                                if (isEmail(loginField)) {
+                                if (isEmail(loginString)) {
                                     Log.d("LoginCheck", "Email detected")
-                                    navController.navigate(Routes.EmailLoginScreen(email = loginField))
-                                } else if (isPhone(loginField)) {
-                                    Log.d("LoginCheck", "Phone detected: $loginField")
-                                    val success = authRepository.sendOtpToPhone(loginField)
+                                    loginFieldType = InputFieldType.success
+                                    navController.navigate(Routes.EmailLoginScreen(email = loginString))
+                                } else if (isPhone(loginString)) {
+                                    Log.d("LoginCheck", "Phone detected: $loginString")
+                                    val success = authRepository.sendOtpToPhone(loginString)
 
                                     if (success) {
                                         Log.d("LoginCheck", "OTP Sent successfully, navigating to OTP screen.")
-                                        navController.navigate(Routes.OtpScreen(phone = loginField))
+                                        navController.navigate(Routes.OtpScreen(phone = loginString))
                                     } else {
                                         errorMessage = "Failed to send OTP. Please check the number or try again."
                                         Log.w("LoginCheck", "sendOtpToPhone returned false.")
                                     }
 
                                 } else {
+                                    loginFieldType = InputFieldType.error
                                     errorMessage = "Invalid email or phone format."
                                 }
                             } catch (e: Exception) {
@@ -122,13 +137,12 @@ fun LoginScreen(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Login")
-                }
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = Color.Black,
+//                        contentColor = Color.White
+//                    )
+                )
+
                 errorMessage?.let {
                     Toast.makeText(LocalContext.current, it, Toast.LENGTH_LONG).show()
                     errorMessage = null

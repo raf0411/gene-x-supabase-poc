@@ -17,6 +17,7 @@ material = "1.12.0"
 appcompat = "1.7.0"
 constraintlayout = "2.2.1"
 materialIconsExtended = "1.7.8"
+multidex = "2.0.1"
 navigationFragmentKtx = "2.8.9"
 navigationUiKtx = "2.8.9"
 ktorClientAndroid = "3.1.1"
@@ -35,6 +36,7 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 auth-kt = { module = "io.github.jan-tennert.supabase: auth-kt" }
 gotrue-kt = { module = "io.github.jan-tennert.supabase:gotrue-kt", version.ref = "gotrueKt" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }

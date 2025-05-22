@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity() {
             profileRepository = profileRepository,
             userRepository = userRepository,
             profilePreferencesRepository = profilePreferencesRepository,
+            authRepository = authRepository,
         )
     }
 

@@ -15,8 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -30,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -39,6 +36,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dynamiclayer.components.button.Button
 import kalbe.corp.genexsupabasepoc.R
 import kalbe.corp.genexsupabasepoc.data.AuthRepository
 import kotlinx.coroutines.launch
@@ -101,6 +99,7 @@ fun EmailLoginScreen(
                 var errorMessage by remember { mutableStateOf<String?>(null) }
 
                 Button(
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         coroutineScope.launch {
                             try {
@@ -112,14 +111,13 @@ fun EmailLoginScreen(
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Login")
-                }
+                    label = "Login"
+//                    modifier = Modifier.fillMaxWidth(),
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = Color.Black,
+//                        contentColor = Color.White
+//                    )
+                )
                 errorMessage?.let {
                     Toast.makeText(LocalContext.current, it, Toast.LENGTH_LONG).show()
                     errorMessage = null

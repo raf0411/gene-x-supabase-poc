@@ -6,9 +6,13 @@ import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.OTP
+import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.postgrest.from
+import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kalbe.corp.genexsupabasepoc.models.UserProfile
-import kalbe.corp.genexsupabasepoc.sessions.SecurePrefs
+import kalbe.corp.genexsupabasepoc.utils.SecurePrefs
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class AuthRepository(
     context: Context,
@@ -67,6 +71,8 @@ class AuthRepository(
             val currentUser = supabaseClient.auth.currentUserOrNull()
             val currentSession = supabaseClient.auth.currentSessionOrNull()
 
+            checkAccessTokenDuration(currentSession)
+
             // Persisting tokens securely here
             securePrefs.putEncrypted("access_token", currentSession?.accessToken.toString())
             securePrefs.putEncrypted("refresh_token", currentSession?.refreshToken.toString())
@@ -75,7 +81,7 @@ class AuthRepository(
             val authId = currentUser?.id
                 ?: throw Exception("User not logged in")
 
-            // Getting user from table "users"
+            // Getting user from table "public.users"
             val user = supabaseClient.from("users")
                 .select {
                     filter {
@@ -99,7 +105,6 @@ class AuthRepository(
 
         return try {
             val newSession = supabaseClient.auth.refreshSession(refreshToken)
-            Log.d("RefreshToken", "After Refresh Token: ${newSession.refreshToken}")
 
             securePrefs.putEncrypted("access_token", newSession.accessToken)
             securePrefs.putEncrypted("refresh_token", newSession.refreshToken)
@@ -110,6 +115,28 @@ class AuthRepository(
             securePrefs.clear()
             false
         }
+    }
+
+    fun checkAccessTokenDuration(currentSession: UserSession?){
+        val expiresAtInstant = currentSession?.expiresAt
+        val now = kotlinx.datetime.Clock.System.now()
+        val duration = expiresAtInstant?.minus(now)
+
+        val timeZone: TimeZone = try {
+            TimeZone.of("Asia/Jakarta")
+        } catch (e: Exception) {
+            Log.w("Timezone", "Could not get specific timezone, using system default.", e)
+            TimeZone.currentSystemDefault()
+        }
+
+        val localNow = now.toLocalDateTime(timeZone)
+        val localExpiresAt = expiresAtInstant?.toLocalDateTime(timeZone)
+
+        Log.i("TokenDurationCheck", "New session received.")
+
+        Log.i("TokenDurationCheck", "Current Time (${timeZone.id}): ${localNow.date} | ${localNow.time}")
+        Log.i("TokenDurationCheck", "Token Expires At (${timeZone.id}): ${localExpiresAt?.date} | ${localExpiresAt?.time}")
+        Log.i("TokenDurationCheck", "Calculated Duration from Now: $duration")
     }
 
     suspend fun logout() {
