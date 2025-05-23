@@ -7,7 +7,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import kalbe.corp.genexsupabasepoc.data.ProductRepository
+import kalbe.corp.genexsupabasepoc.repositories.ProductRepository
 import kalbe.corp.genexsupabasepoc.ui.components.NavBar
 import kalbe.corp.genexsupabasepoc.ui.components.SearchBar
 

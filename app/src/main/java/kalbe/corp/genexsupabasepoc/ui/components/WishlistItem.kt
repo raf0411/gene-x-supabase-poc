@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import kalbe.corp.genexsupabasepoc.data.ProductRepository
+import kalbe.corp.genexsupabasepoc.repositories.ProductRepository
 import kalbe.corp.genexsupabasepoc.models.Product
 import kalbe.corp.genexsupabasepoc.models.Wishlist
 

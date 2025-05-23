@@ -1,4 +1,4 @@
-package kalbe.corp.genexsupabasepoc.data
+package kalbe.corp.genexsupabasepoc.repositories
 
 import android.util.Log
 import io.github.jan.supabase.auth.auth

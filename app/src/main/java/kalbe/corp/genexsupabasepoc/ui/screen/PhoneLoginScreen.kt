@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kalbe.corp.genexsupabasepoc.R
-import kalbe.corp.genexsupabasepoc.data.AuthRepository
+import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
 import kalbe.corp.genexsupabasepoc.navigation.Routes
 import kotlinx.coroutines.launch
 

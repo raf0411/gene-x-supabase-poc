@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import kalbe.corp.genexsupabasepoc.data.ProductRepository
+import kalbe.corp.genexsupabasepoc.repositories.ProductRepository
 import kalbe.corp.genexsupabasepoc.models.Product
 import kalbe.corp.genexsupabasepoc.ui.components.BottomBar
 import kalbe.corp.genexsupabasepoc.ui.components.NavBar

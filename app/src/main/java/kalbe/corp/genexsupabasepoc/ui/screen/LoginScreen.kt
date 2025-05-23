@@ -37,7 +37,7 @@ import com.dynamiclayer.components.inputField.util.InputFieldSize
 import com.dynamiclayer.components.inputField.util.InputFieldState
 import com.dynamiclayer.components.inputField.util.InputFieldType
 import kalbe.corp.genexsupabasepoc.R
-import kalbe.corp.genexsupabasepoc.data.AuthRepository
+import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
 import kalbe.corp.genexsupabasepoc.navigation.Routes
 import kotlinx.coroutines.launch
 

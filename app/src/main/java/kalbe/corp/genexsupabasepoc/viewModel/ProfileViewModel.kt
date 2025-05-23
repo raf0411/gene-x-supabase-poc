@@ -5,10 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import io.github.jan.supabase.postgrest.exception.PostgrestRestException
-import kalbe.corp.genexsupabasepoc.data.AuthRepository
-import kalbe.corp.genexsupabasepoc.data.ProfilePreferencesRepository
-import kalbe.corp.genexsupabasepoc.data.ProfileRepository
-import kalbe.corp.genexsupabasepoc.data.UserRepository
+import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
+import kalbe.corp.genexsupabasepoc.repositories.ProfilePreferencesRepository
+import kalbe.corp.genexsupabasepoc.repositories.ProfileRepository
+import kalbe.corp.genexsupabasepoc.repositories.UserRepository
 import kalbe.corp.genexsupabasepoc.models.Profile
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

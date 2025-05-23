@@ -5,10 +5,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import kalbe.corp.genexsupabasepoc.data.AuthRepository
-import kalbe.corp.genexsupabasepoc.data.ProductRepository
-import kalbe.corp.genexsupabasepoc.data.UserRepository
-import kalbe.corp.genexsupabasepoc.data.WishlistRepository
+import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
+import kalbe.corp.genexsupabasepoc.repositories.ProductRepository
+import kalbe.corp.genexsupabasepoc.repositories.UserRepository
+import kalbe.corp.genexsupabasepoc.repositories.WishlistRepository
 import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kalbe.corp.genexsupabasepoc.ui.screen.DashboardScreen
 import kalbe.corp.genexsupabasepoc.ui.screen.EmailLoginScreen

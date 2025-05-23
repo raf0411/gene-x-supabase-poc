@@ -14,7 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import kalbe.corp.genexsupabasepoc.data.ProductRepository
+import kalbe.corp.genexsupabasepoc.repositories.ProductRepository
 import kalbe.corp.genexsupabasepoc.models.Product
 import kalbe.corp.genexsupabasepoc.ui.components.ProductItem
 

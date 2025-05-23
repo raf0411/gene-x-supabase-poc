@@ -72,6 +72,10 @@ dependencies {
     implementation (libs.kotlinx.serialization.json)
     implementation(libs.gotrue.kt)
 
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+    implementation(libs.gson)
+
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.navigation.compose)

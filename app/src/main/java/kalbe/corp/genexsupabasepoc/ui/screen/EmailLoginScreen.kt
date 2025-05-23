@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dynamiclayer.components.button.Button
 import kalbe.corp.genexsupabasepoc.R
-import kalbe.corp.genexsupabasepoc.data.AuthRepository
+import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
 import kotlinx.coroutines.launch
 
 @Composable
@@ -112,11 +112,6 @@ fun EmailLoginScreen(
                         }
                     },
                     label = "Login"
-//                    modifier = Modifier.fillMaxWidth(),
-//                    colors = ButtonDefaults.buttonColors(
-//                        containerColor = Color.Black,
-//                        contentColor = Color.White
-//                    )
                 )
                 errorMessage?.let {
                     Toast.makeText(LocalContext.current, it, Toast.LENGTH_LONG).show()

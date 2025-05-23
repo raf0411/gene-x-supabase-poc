@@ -1,4 +1,4 @@
-package kalbe.corp.genexsupabasepoc.data
+package kalbe.corp.genexsupabasepoc.repositories
 
 import android.content.Context
 import android.util.Log
@@ -18,12 +18,6 @@ val Context.profileDataStore: DataStore<Preferences> by preferencesDataStore(nam
 interface ProfilePreferencesRepository {
     suspend fun saveSelectedProfileId(profileId: String)
 
-    /**
-     * Gets a Flow that emits the last selected profile ID.
-     * Emits null if no profile ID has been saved yet.
-     * The Flow automatically emits new values if the preference changes.
-     * @return Flow emitting the profile ID (String?...) or null.
-     */
     fun getSelectedProfileId(): Flow<String?>
 }
 

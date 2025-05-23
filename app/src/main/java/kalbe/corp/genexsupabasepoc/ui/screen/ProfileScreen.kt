@@ -61,8 +61,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import kalbe.corp.genexsupabasepoc.data.AuthRepository
-import kalbe.corp.genexsupabasepoc.data.UserRepository
+import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
+import kalbe.corp.genexsupabasepoc.repositories.UserRepository
 import kalbe.corp.genexsupabasepoc.navigation.Routes
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileBanner
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileButtonItem

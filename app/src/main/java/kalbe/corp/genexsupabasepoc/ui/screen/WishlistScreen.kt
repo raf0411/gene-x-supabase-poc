@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import io.github.jan.supabase.auth.auth
-import kalbe.corp.genexsupabasepoc.data.ProductRepository
-import kalbe.corp.genexsupabasepoc.data.WishlistRepository
+import kalbe.corp.genexsupabasepoc.repositories.ProductRepository
+import kalbe.corp.genexsupabasepoc.repositories.WishlistRepository
 import kalbe.corp.genexsupabasepoc.data.WishlistService
 import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kalbe.corp.genexsupabasepoc.models.Wishlist
