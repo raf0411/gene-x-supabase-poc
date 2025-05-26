@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.0.0"
+    id("com.google.gms.google-services")
 }
 
 val localProps = Properties()
@@ -61,6 +62,9 @@ android {
 dependencies {
     implementation(project(":components"))
     implementation (libs.androidx.multidex)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging.ktx)
 
     // Supabase
     implementation (platform (libs.supabase.bom))

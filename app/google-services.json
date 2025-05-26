@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "25200042772",
+    "project_id": "genex-poc-1dd5d",
+    "storage_bucket": "genex-poc-1dd5d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25200042772:android:77eeba0b29b1ba95c71801",
+        "android_client_info": {
+          "package_name": "kalbe.corp.genexsupabasepoc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgj-imjI9-Rg0DDRN5Hj6MIFf_v74ULOU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
