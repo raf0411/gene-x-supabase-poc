@@ -3,12 +3,14 @@
     <string name="product_list_text_screen_title">Product List</string>
     <string name="product_details_text_screen_title">Product Details</string>
     <string name="add_product_text_screen_title">Add Product</string>
-    <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+
+    <string name="default_notification_channel_name">General Notifications</string>
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus

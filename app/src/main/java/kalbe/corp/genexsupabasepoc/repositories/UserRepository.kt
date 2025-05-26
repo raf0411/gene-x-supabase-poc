@@ -9,6 +9,25 @@ import kalbe.corp.genexsupabasepoc.models.Account
 import kalbe.corp.genexsupabasepoc.models.UserProfile
 
 class UserRepository {
+    suspend fun updateUserFcmToken(userId: String, token: String): Boolean {
+        return try {
+            supabaseClient.from("users").update(mapOf("fcm_token" to token)) {
+                filter {
+                    eq("account_id", userId)
+                }
+            }
+            Log.d(TAG, "FCM Token successfully updated in Supabase for user: $userId")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating FCM token in Supabase for user $userId", e)
+            false
+        }
+    }
+
+    companion object {
+        private const val TAG = "NotificationService"
+    }
+
     suspend fun getCurrentUser(): UserProfile?{
         val accountId = supabaseClient.auth.currentUserOrNull()?.id
             ?: throw Exception("User not logged in")

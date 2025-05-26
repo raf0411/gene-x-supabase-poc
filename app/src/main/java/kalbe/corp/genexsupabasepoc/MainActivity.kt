@@ -95,11 +95,9 @@ class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                // FCM SDK (and your app) can post notifications.
                 Log.d(TAG, "Notification permission granted.")
                 getAndStoreFcmToken()
             } else {
-                // TODO: Inform user that that your app will not show notifications.
                 Log.w(TAG, "Notification permission denied.")
             }
         }
@@ -109,19 +107,14 @@ class MainActivity : ComponentActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                // Permission already granted
                 getAndStoreFcmToken()
             } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
                 // TODO: Display an educational UI explaining why the permission is needed
-                // then request the permission
-                // For now, just requesting directly
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             } else {
-                // Directly ask for the permission
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         } else {
-            // No runtime permission needed for pre-TIRAMISU
             getAndStoreFcmToken()
         }
     }
@@ -132,20 +125,30 @@ class MainActivity : ComponentActivity() {
                 Log.w(TAG, "Fetching FCM registration token failed", task.exception)
                 return@addOnCompleteListener
             }
-            val token = task.result
-            Log.d(TAG, "Current FCM Token: $token")
-            // Call your function to send this token to Supabase
-            // (similar to sendRegistrationToServer in MyFirebaseMessagingService)
-            // myFirebaseMessagingService.sendRegistrationToServer(token)
+            val fcmToken = task.result
+            Log.d(TAG, "Current FCM Token: $fcmToken")
+
+            if (fcmToken == null) {
+                Log.w(TAG, "Fetched FCM token is null.")
+                return@addOnCompleteListener
+            }
+
+//            lifecycleScope.launch {
+//                val userId = supabaseClient.auth.currentUserOrNull()?.id
+//
+//                if (userId != null) {
+//                    val success = userRepository.updateUserFcmToken(userId, fcmToken)
+//                    if (success) {
+//                        Log.i(TAG, "FCM Token sent to Supabase from MainActivity.")
+//                    } else {
+//                        Log.w(TAG, "Failed to send FCM Token to Supabase from MainActivity.")
+//                    }
+//                } else {
+//                    Log.w(TAG, "User not authenticated, cannot send FCM token from MainActivity.")
+//                }
+//            }
         }
     }
-
-    // Call askNotificationPermission() at an appropriate point, e.g. in onCreate or after login
-    // onCreate(savedInstanceState: Bundle?) {
-    //    super.onCreate(savedInstanceState)
-    //    // ...
-    //    askNotificationPermission()
-    // }
 }
 
 @Composable

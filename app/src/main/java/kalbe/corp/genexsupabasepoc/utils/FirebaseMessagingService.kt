@@ -1,20 +1,32 @@
 package kalbe.corp.genexsupabasepoc.utils
+
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.media.RingtoneManager
+import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.from
-import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
+import kalbe.corp.genexsupabasepoc.MainActivity
+import kalbe.corp.genexsupabasepoc.R
+import kalbe.corp.genexsupabasepoc.repositories.UserRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.SupervisorJob
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
+    private val job = SupervisorJob()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + job)
+
+    private val userRepository = UserRepository()
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d(TAG, "Refreshed token: $token")
-        // TODO: Send this token to your Supabase backend
         sendRegistrationToServer(token)
     }
 
@@ -22,40 +34,75 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
         Log.d(TAG, "From: ${remoteMessage.from}")
 
-        // Check if message contains a data payload.
         remoteMessage.data.isNotEmpty().let {
             Log.d(TAG, "Message data payload: " + remoteMessage.data)
-            // Handle data payload here (e.g., for background notifications or custom data)
         }
 
-        // Check if message contains a notification payload.
-        remoteMessage.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
-            // Handle notification payload here (e.g., display a notification if app is in foreground)
-            // You might want to build a local notification to display to the user
+        remoteMessage.notification?.let { notification ->
+            Log.d(TAG, "Message Notification Title: ${notification.title}")
+            Log.d(TAG, "Message Notification Body: ${notification.body}")
+
+            sendLocalNotification(notification.title, notification.body)
         }
     }
 
-    private fun sendRegistrationToServer(token: String?) {
-         CoroutineScope(Dispatchers.IO).launch {
-             try {
-                 val userId = supabaseClient.auth.currentUserOrNull()?.id
-                 if (userId != null && token != null) {
-                     // Assuming you have a 'profiles' table with an 'fcm_token' column
-                     // Or a 'device_tokens' table with 'user_id' and 'token' columns
-                     supabaseClient.from("users").update(mapOf("fcm_token" to token)){
-                         filter {
-                             eq("account_id", userId)
-                         }
-                     }
+    private fun sendLocalNotification(title: String?, messageBody: String?) {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        val pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
 
-                     Log.d(TAG, "FCM Token updated in Supabase")
-                 }
-             } catch (e: Exception) {
-                 Log.e(TAG, "Error updating FCM token in Supabase", e)
-             }
-         }
-        Log.d(TAG, "TODO: Implement sendRegistrationToServer($token)")
+        val channelId = "fcm_default_channel"
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(title ?: "FCM Message")
+            .setContentText(messageBody)
+            .setAutoCancel(true)
+            .setSound(defaultSoundUri)
+            .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId,
+                "Default FCM Channel",
+                NotificationManager.IMPORTANCE_HIGH)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build())
+    }
+
+    private fun sendRegistrationToServer(token: String?) {
+        if (token == null) {
+            Log.w(TAG, "FCM token is null, cannot send to server.")
+            return
+        }
+
+//        serviceScope.launch {
+//            try {
+//                val userId = supabaseClient.auth.currentUserOrNull()?.id
+//                if (userId != null) {
+//                    val success = userRepository.updateUserFcmToken(userId, token)
+//                    if (success) {
+//                        Log.d(TAG, "FCM Token update successful via repository.")
+//                    } else {
+//                        Log.w(TAG, "FCM Token update failed via repository.")
+//                    }
+//                } else {
+//                    Log.w(TAG, "User not logged in, cannot send FCM token from service.")
+//                }
+//            } catch (e: Exception) {
+//                Log.e(TAG, "Error in sendRegistrationToServer scope", e)
+//            }
+//        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
     }
 
     companion object {
