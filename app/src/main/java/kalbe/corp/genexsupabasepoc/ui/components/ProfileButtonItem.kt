@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 fun ProfileButtonItem(
     text: String,
     icon: ImageVector,
+    onClick: () -> Unit,
 ){
     Column(
         modifier = Modifier
@@ -53,7 +54,7 @@ fun ProfileButtonItem(
                 }
 
                 IconButton(
-                    onClick = {}
+                    onClick = { onClick() }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ChevronRight,

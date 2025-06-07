@@ -5,6 +5,7 @@ import android.util.Log
 import com.google.gson.Gson
 import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.mfa.AuthenticatorAssuranceLevel
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.OTP
 import io.github.jan.supabase.auth.user.UserSession
@@ -36,6 +37,12 @@ data class LoginFailedPayload(
     val emailAttempted: String,
     val reason: String
 )
+
+sealed class LoginResult {
+    data class Success(val isFirstLogin: Boolean) : LoginResult()
+    data object MfaRequired : LoginResult()
+    data class Failure(val errorMessage: String) : LoginResult()
+}
 
 class AuthRepository(
     context: Context,
@@ -95,44 +102,84 @@ class AuthRepository(
         }
     }
 
-    suspend fun loginUser(email: String, password: String): Boolean {
+//    suspend fun loginUser(email: String, password: String): Boolean {
+//        try {
+//            supabaseClient.auth.signInWith(Email) {
+//                this.email = email
+//                this.password = password
+//            }
+//
+//            val currentUser = supabaseClient.auth.currentUserOrNull()
+//            val currentSession = supabaseClient.auth.currentSessionOrNull()
+//
+//            if (currentUser != null && currentSession != null) {
+//                sendLoginSuccessEvent(currentUser.id)
+//                Log.d("SecurityCheck", "User ${currentUser.id} logged in successfully.")
+//
+//                checkAccessTokenDuration(currentSession)
+//                securePrefs.putEncrypted("access_token", currentSession.accessToken)
+//                securePrefs.putEncrypted("refresh_token", currentSession.refreshToken)
+//                securePrefs.putEncrypted("expires_at", currentSession.expiresAt.toString())
+//
+//                val authId = currentUser.id
+//                    ?: throw Exception("User not logged in after successful authentication check.")
+//
+//                val userProfile = supabaseClient.from("users")
+//                    .select {
+//                        filter {
+//                            eq("account_id", authId)
+//                        }
+//                    }
+//                    .decodeSingle<UserProfile>()
+//
+//                return userProfile.isFirstTimeLogin
+//
+//            } else {
+//                sendLoginFailedEvent(email, "Login failed: No user session established after attempt.")
+//                Log.d("SecurityCheck", "Login failed: No user session established after attempt.")
+//                return false
+//            }
+//
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            val errorMessage = e.message ?: "Unknown login error"
+//            sendLoginFailedEvent(email, "Login failed: $errorMessage")
+//            Log.d("SecurityCheck", "Login failed: $errorMessage")
+//            throw e
+//        }
+//    }
+
+    suspend fun loginUser(email: String, password: String): LoginResult {
+        val bypassMfaForDevelopment = true
+
         try {
             supabaseClient.auth.signInWith(Email) {
                 this.email = email
                 this.password = password
             }
 
-            val currentUser = supabaseClient.auth.currentUserOrNull()
-            val currentSession = supabaseClient.auth.currentSessionOrNull()
+            val (currentAal, _) = supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel()
 
-            if (currentUser != null && currentSession != null) {
-                sendLoginSuccessEvent(currentUser.id)
-                Log.d("SecurityCheck", "User ${currentUser.id} logged in successfully.")
-                // TODO: Lanjutkan ke layar utama aplikasi (misalnya, navigasi)
+            if (currentAal == AuthenticatorAssuranceLevel.AAL1 && !bypassMfaForDevelopment) {
+                val userId = supabaseClient.auth.currentUserOrNull()?.id ?: "Unknown User"
+                Log.d("SecurityCheck", "MFA is required for user $userId. Current AAL is 'aal1'.")
+                return LoginResult.MfaRequired
+            } else {
+                val currentSession = supabaseClient.auth.currentSessionOrNull()!!
+                val currentUser = currentSession.user
+                sendLoginSuccessEvent(currentUser?.id ?: "NONE")
+                Log.d("SecurityCheck", "User ${currentUser?.id} logged in successfully (Current AAL: $currentAal).")
 
                 checkAccessTokenDuration(currentSession)
                 securePrefs.putEncrypted("access_token", currentSession.accessToken)
                 securePrefs.putEncrypted("refresh_token", currentSession.refreshToken)
                 securePrefs.putEncrypted("expires_at", currentSession.expiresAt.toString())
 
-                val authId = currentUser.id
-                    ?: throw Exception("User not logged in after successful authentication check.")
-
                 val userProfile = supabaseClient.from("users")
-                    .select {
-                        filter {
-                            eq("account_id", authId)
-                        }
-                    }
+                    .select { filter { eq("account_id", currentUser?.id ?: "NONE") } }
                     .decodeSingle<UserProfile>()
 
-                return userProfile.isFirstTimeLogin
-
-            } else {
-                sendLoginFailedEvent(email, "Login failed: No user session established after attempt.")
-                Log.d("SecurityCheck", "Login failed: No user session established after attempt.")
-                // TODO: Tampilkan pesan error umum ke pengguna
-                return false
+                return LoginResult.Success(userProfile.isFirstTimeLogin)
             }
 
         } catch (e: Exception) {
@@ -140,8 +187,38 @@ class AuthRepository(
             val errorMessage = e.message ?: "Unknown login error"
             sendLoginFailedEvent(email, "Login failed: $errorMessage")
             Log.d("SecurityCheck", "Login failed: $errorMessage")
-            // TODO: Tampilkan pesan error ke pengguna
-            throw e
+            return LoginResult.Failure(errorMessage)
+        }
+    }
+
+    suspend fun verifyMfaChallenge(code: String): Boolean {
+        try {
+            val factors = supabaseClient.auth.mfa.verifiedFactors
+            val totpFactor = factors.firstOrNull { it.factorType == "totp" }
+                ?: throw Exception("No TOTP factor found for user.")
+
+            val challenge = supabaseClient.auth.mfa.createChallenge(totpFactor.id)
+
+            supabaseClient.auth.mfa.verifyChallenge(
+                factorId = totpFactor.id,
+                challengeId = challenge.id,
+                code = code,
+                saveSession = true
+            )
+
+            val newSession = supabaseClient.auth.currentSessionOrNull()
+                ?: throw IllegalStateException("MFA verification succeeded but no session was established.")
+
+            securePrefs.putEncrypted("access_token", newSession.accessToken)
+            securePrefs.putEncrypted("refresh_token", newSession.refreshToken)
+            securePrefs.putEncrypted("expires_at", newSession.expiresAt.toString())
+
+            Log.d("SecurityCheck", "MFA verification successful. Session upgraded to AAL2.")
+            return true
+
+        } catch (e: Exception) {
+            Log.e("SecurityCheck", "MFA verification failed: ${e.message}", e)
+            return false
         }
     }
 

@@ -39,13 +39,15 @@ import androidx.compose.ui.unit.sp
 import com.dynamiclayer.components.button.Button
 import kalbe.corp.genexsupabasepoc.R
 import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
+import kalbe.corp.genexsupabasepoc.repositories.LoginResult
 import kotlinx.coroutines.launch
 
 @Composable
 fun EmailLoginScreen(
     authRepository: AuthRepository,
     onLoginSuccess: (Boolean) -> Unit,
-    email: String,
+    onMfaRequired: () -> Unit,
+    email: String
 ) {
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -102,12 +104,24 @@ fun EmailLoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         coroutineScope.launch {
-                            try {
-                                val isFirstLogin = authRepository.loginUser(email, password)
-                                onLoginSuccess(isFirstLogin)
-                            } catch (e: Exception) {
-                                errorMessage = "Login failed: ${e.message}"
-                                Log.e("ErrorMessage", e.message.toString())
+                            // The result from the repository is now a LoginResult object
+                            when (val result = authRepository.loginUser(email, password)) {
+
+                                is LoginResult.Success -> {
+                                    // It's a success! Call onLoginSuccess with the boolean inside.
+                                    onLoginSuccess(result.isFirstLogin)
+                                }
+
+                                is LoginResult.MfaRequired -> {
+                                    // MFA is required! Call the new navigation callback.
+                                    onMfaRequired()
+                                }
+
+                                is LoginResult.Failure -> {
+                                    // It's a failure. Set the error message from the result.
+                                    errorMessage = "Login failed: ${result.errorMessage}"
+                                    Log.e("ErrorMessage", result.errorMessage)
+                                }
                             }
                         }
                     },

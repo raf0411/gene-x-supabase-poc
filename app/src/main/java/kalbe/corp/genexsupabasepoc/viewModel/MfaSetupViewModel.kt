@@ -1,59 +1,114 @@
 package kalbe.corp.genexsupabasepoc.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.mfa.FactorType
 import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 data class MfaEnrollmentState(
     val qrCodeSvg: String? = null,
     val factorId: String? = null,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val userCode: String = "",
+    val isVerified: Boolean = false,
+    val isAlreadyEnabled: Boolean? = null
 )
 
-class MfaSetupViewModel: ViewModel() {
+class MfaSetupViewModel : ViewModel() {
+
     private val _enrollmentState = MutableStateFlow(MfaEnrollmentState())
     val enrollmentState: StateFlow<MfaEnrollmentState> = _enrollmentState.asStateFlow()
 
     private val supabase = supabaseClient
 
-    fun startTotpEnrollment(friendlyName: String = "My App TOTP") {
-        viewModelScope.launch {
-            _enrollmentState.value = MfaEnrollmentState(isLoading = true)
-            try {
-//                // Attempt this declaration
-//                val factor: MfaFactor<TotpDetails> = supabase.auth.mfa.enroll(
-//                    factorType = FactorType.TOTP,
-//                    friendlyName = friendlyName
-//                )
-//
-//                // If the above line compiles, then try to access the qrCode.
-//                // Most likely, it's still via the .totp property:
-//                val qrCodeString: String? = factor.totp?.qrCode
-//                val factorIdForChallenge = factor.id
-//
-//                if (qrCodeString != null && factorIdForChallenge != null) {
-//                    _enrollmentState.value = MfaEnrollmentState(
-//                        qrCodeSvg = qrCodeString,
-//                        factorId = factorIdForChallenge,
-//                        isLoading = false
-//                    )
-//                } else {
-//                    _enrollmentState.value = MfaEnrollmentState(error = "Failed to retrieve TOTP QR code or Factor ID.", isLoading = false)
-//                }
+    // This function for updating text field state is fine as is
+    fun onCodeChanged(newCode: String) {
+        _enrollmentState.value = _enrollmentState.value.copy(userCode = newCode)
+    }
 
-            } catch (e: Exception) {
-                _enrollmentState.value = MfaEnrollmentState(error = e.message ?: "Unknown error occurred", isLoading = false)
-                // Log.e("MfaSetupViewModel", "Error enrolling TOTP", e)
-            }
+    // --- CHANGE #1: Make this a suspend function and remove viewModelScope ---
+    suspend fun checkCurrentMfaStatus() {
+        _enrollmentState.value = _enrollmentState.value.copy(isLoading = true, error = null)
+        try {
+            val factors = supabase.auth.mfa.verifiedFactors
+            val hasTotp = factors.any { it.factorType == "totp" || it.factorType == "TOTP" }
+            _enrollmentState.value = _enrollmentState.value.copy(
+                isLoading = false,
+                isAlreadyEnabled = hasTotp
+            )
+        } catch (e: Throwable) {
+            _enrollmentState.value = _enrollmentState.value.copy(
+                isLoading = false,
+                error = "Could not check MFA status: ${e.message}",
+                isAlreadyEnabled = false
+            )
         }
     }
 
-    // You'll need another function to create the challenge and then verify it.
-    // This is the next step after showing the QR code and the user entering the TOTP.
-    // fun createChallengeAndVerify(factorId: String, code: String) { ... }
+    suspend fun startTotpEnrollment() {
+        _enrollmentState.value = _enrollmentState.value.copy(isLoading = true, error = null)
+        try {
+            val factor = supabase.auth.mfa.enroll(factorType = FactorType.TOTP)
+
+            Log.d("MfaEnrollDebug", "Enroll call succeeded. Factor ID: ${factor.id}")
+            Log.d("MfaEnrollDebug", "Raw 'data' object received: ${factor.data}")
+            Log.d("MfaEnrollDebug", "Class of 'data' object: ${factor.data!!::class.simpleName}")
+
+            val dataMap = factor.data as? Map<*, *>
+            Log.d("MfaEnrollDebug", "Was cast to Map successful? -> ${dataMap != null}")
+            if (dataMap != null) {
+                Log.d("MfaEnrollDebug", "All keys found in map: ${dataMap.keys}")
+                Log.d("MfaEnrollDebug", "Value for 'qr_code' key: ${dataMap["qrCode"]} or ${dataMap["qr_code"]}")
+            }
+
+
+            val qrCodeString = dataMap?.get("qr_code") as? String
+
+            if (qrCodeString != null) {
+                _enrollmentState.value = _enrollmentState.value.copy(
+                    isLoading = false,
+                    qrCodeSvg = qrCodeString,
+                    factorId = factor.id
+                )
+            } else {
+                throw IllegalStateException("QR Code not found in factor data.")
+            }
+        } catch (e: Throwable) {
+            _enrollmentState.value = _enrollmentState.value.copy(
+                isLoading = false,
+                error = e.message ?: "An unknown error occurred."
+            )
+        }
+    }
+
+    // --- CHANGE #3: Make this a suspend function and remove viewModelScope ---
+    suspend fun verifyAndEnableMfa() {
+        val currentState = _enrollmentState.value
+        val factorId = currentState.factorId ?: return
+        val code = currentState.userCode
+
+        _enrollmentState.value = currentState.copy(isLoading = true, error = null)
+        try {
+            val challenge = supabase.auth.mfa.createChallenge(factorId)
+            supabase.auth.mfa.verifyChallenge(
+                factorId = factorId,
+                challengeId = challenge.id,
+                code = code
+            )
+            _enrollmentState.value = _enrollmentState.value.copy(
+                isLoading = false,
+                isVerified = true
+            )
+        } catch (e: Throwable) {
+            _enrollmentState.value = _enrollmentState.value.copy(
+                isLoading = false,
+                error = "Verification failed: ${e.message}"
+            )
+        }
+    }
 }

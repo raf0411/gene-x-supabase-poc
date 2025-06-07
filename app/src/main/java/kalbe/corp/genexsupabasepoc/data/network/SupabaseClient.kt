@@ -17,7 +17,7 @@ val supabaseClient = createSupabaseClient(
     install(Postgrest)
     install(Auth){
         autoLoadFromStorage = true
-        alwaysAutoRefresh = true
+//        alwaysAutoRefresh = true
     }
     httpConfig {
         this.install(WebSockets)

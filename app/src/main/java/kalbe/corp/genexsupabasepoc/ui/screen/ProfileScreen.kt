@@ -26,8 +26,10 @@ import androidx.compose.material.icons.outlined.MedicalInformation
 import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Scale
+import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -61,9 +63,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.mfa.FactorType
+import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
+import kalbe.corp.genexsupabasepoc.navigation.Routes
 import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
 import kalbe.corp.genexsupabasepoc.repositories.UserRepository
-import kalbe.corp.genexsupabasepoc.navigation.Routes
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileBanner
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileButtonItem
 import kalbe.corp.genexsupabasepoc.ui.components.ProfileHeaderToggle
@@ -99,8 +104,7 @@ fun ProfileScreen(
     }
 
     val viewModel: ProfileViewModel = viewModel(
-        viewModelStoreOwner = parentEntry,
-        factory = profileViewModelFactory
+        viewModelStoreOwner = parentEntry, factory = profileViewModelFactory
     )
 
     val selectedProfile by viewModel.selectedProfile.collectAsState()
@@ -145,7 +149,7 @@ fun ProfileScreen(
         lifecycleOwner.lifecycle.addObserver(observer)
 
         onDispose {
-            Log.d(tag,"DisposableEffect onDispose: Removing lifecycle observer.")
+            Log.d(tag, "DisposableEffect onDispose: Removing lifecycle observer.")
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
@@ -180,13 +184,17 @@ fun ProfileScreen(
                                     Toast.makeText(context, "Logged Out", Toast.LENGTH_SHORT).show()
 
                                     navController.navigate(Routes.LoginScreen) {
-                                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            inclusive = true
+                                        }
                                         launchSingleTop = true
                                     }
 
                                 } catch (e: Exception) {
                                     Log.e(tag, "Error during manual logout", e)
-                                    Toast.makeText(context, "Logout failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context, "Logout failed: ${e.message}", Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
                         },
@@ -226,6 +234,30 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
         ) {
+            Button(onClick = {
+                Log.d("MfaApiTest", "--- Running Raw Enroll Test ---")
+                // Use the coroutineScope you already have in ProfileScreen
+                coroutineScope.launch {
+                    try {
+                        Log.d("MfaApiTest", "Attempting to call enroll()...")
+
+                        // We call the function directly from the client
+                        val factor = supabaseClient.auth.mfa.enroll(factorType = FactorType.TOTP)
+
+                        Log.d("MfaApiTest", "✅ SUCCESS! Enroll returned a factor with ID: ${factor.id}")
+                        Toast.makeText(context, "SUCCESS: Check MfaApiTest Log!", Toast.LENGTH_SHORT).show()
+
+                    } catch (e: Throwable) { // Catching Throwable is safer for debugging
+                        Log.e("MfaApiTest", "❌ FAILURE! The enroll() call crashed.", e)
+                        Toast.makeText(context, "FAILURE: Check MfaApiTest Log!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }) {
+                Text("Run Raw Enroll Test")
+            }
+
+            Spacer(Modifier.height(16.dp))
+
             if (isLoading) {
                 Box(
                     modifier = Modifier
@@ -234,8 +266,7 @@ fun ProfileScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        strokeWidth = 4.dp
+                        color = MaterialTheme.colorScheme.primary, strokeWidth = 4.dp
                     )
                 }
             } else if (selectedProfile != null) {
@@ -250,42 +281,95 @@ fun ProfileScreen(
                         if (availableProfiles.size > 1) {
                             showBottomSheet = true
                         } else {
-                            Toast.makeText(context, "No other profiles to switch to.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context, "No other profiles to switch to.", Toast.LENGTH_SHORT
+                            ).show()
                         }
                     },
                 )
 
                 // --- Sections ---
                 ProfileHeaderToggle(headerText = "Personal Information")
-                ProfileInfoItem( infoText = "Height (cm)", infoValueText = "${selectedProfile?.height ?: "N/A"}", icon = Icons.Outlined.Height)
-                ProfileInfoItem( infoText = "Weight (kg)", infoValueText = "${selectedProfile?.weight ?: "N/A"}", icon = Icons.Outlined.Scale)
-                ProfileInfoItem( infoText = "Calories (kkal)", infoValueText = "${selectedProfile?.calories ?: "N/A"}", icon = Icons.Outlined.Fastfood)
-                ProfileInfoItem( infoText = "Max Heart Rate (bpm)", infoValueText = "${selectedProfile?.max_heart_rate ?: "N/A"}", icon = Icons.Outlined.MonitorHeart)
-                ProfileInfoItem( infoText = "Protein Intake (g)", infoValueText = "${selectedProfile?.protein_intake ?: "N/A"}", icon = Icons.Outlined.LocalDrink)
+                ProfileInfoItem(
+                    infoText = "Height (cm)",
+                    infoValueText = "${selectedProfile?.height ?: "N/A"}",
+                    icon = Icons.Outlined.Height
+                )
+                ProfileInfoItem(
+                    infoText = "Weight (kg)",
+                    infoValueText = "${selectedProfile?.weight ?: "N/A"}",
+                    icon = Icons.Outlined.Scale
+                )
+                ProfileInfoItem(
+                    infoText = "Calories (kkal)",
+                    infoValueText = "${selectedProfile?.calories ?: "N/A"}",
+                    icon = Icons.Outlined.Fastfood
+                )
+                ProfileInfoItem(
+                    infoText = "Max Heart Rate (bpm)",
+                    infoValueText = "${selectedProfile?.max_heart_rate ?: "N/A"}",
+                    icon = Icons.Outlined.MonitorHeart
+                )
+                ProfileInfoItem(
+                    infoText = "Protein Intake (g)",
+                    infoValueText = "${selectedProfile?.protein_intake ?: "N/A"}",
+                    icon = Icons.Outlined.LocalDrink
+                )
 
                 Spacer(Modifier.height(16.dp))
 
                 ProfileHeaderToggle(headerText = "Account")
-                ProfileButtonItem(text = "Profile", icon = Icons.Outlined.Person)
-                ProfileButtonItem(text = "Medical Profile", icon = Icons.Outlined.MedicalInformation)
-                ProfileButtonItem(text = "Reminder", icon = Icons.Outlined.Timer)
-                ProfileButtonItem(text = "Language", icon = Icons.Outlined.TextFields)
-                ProfileButtonItem(text = "Timezone", icon = Icons.Outlined.Language)
-                ProfileButtonItem(text = "Accessibility", icon = Icons.Outlined.Accessibility)
+                ProfileButtonItem(text = "Profile", icon = Icons.Outlined.Person, onClick = {})
+                ProfileButtonItem(
+                    text = "Multi-Factor Authentication",
+                    icon = Icons.Outlined.Security,
+                    onClick = {
+                        navController.navigate(Routes.MfaSetupScreen)
+                    })
+                ProfileButtonItem(
+                    text = "Medical Profile", icon = Icons.Outlined.MedicalInformation, onClick = {
+
+                    })
+                ProfileButtonItem(text = "Reminder", icon = Icons.Outlined.Timer, onClick = {
+
+                })
+                ProfileButtonItem(text = "Language", icon = Icons.Outlined.TextFields, onClick = {
+
+                })
+                ProfileButtonItem(text = "Timezone", icon = Icons.Outlined.Language, onClick = {
+
+                })
+                ProfileButtonItem(
+                    text = "Accessibility", icon = Icons.Outlined.Accessibility, onClick = {
+
+                    })
 
                 Spacer(Modifier.height(16.dp))
 
                 ProfileHeaderToggle(headerText = "General")
-                ProfileButtonItem(text = "About AI", icon = Icons.Outlined.ChatBubbleOutline)
-                ProfileButtonItem(text = "About Us", icon = Icons.Outlined.Info)
-                ProfileButtonItem(text = "Terms of Services", icon = Icons.Outlined.Description)
+                ProfileButtonItem(
+                    text = "About AI", icon = Icons.Outlined.ChatBubbleOutline, onClick = {
+                        // This will navigate to the new screen we are about to create
+                        navController.navigate(Routes.MfaSetupScreen)
+                    })
+                ProfileButtonItem(text = "About Us", icon = Icons.Outlined.Info, onClick = {
+                    // This will navigate to the new screen we are about to create
+                    navController.navigate(Routes.MfaSetupScreen)
+                })
+                ProfileButtonItem(
+                    text = "Terms of Services", icon = Icons.Outlined.Description, onClick = {
+                        // This will navigate to the new screen we are about to create
+                        navController.navigate(Routes.MfaSetupScreen)
+                    })
 
                 Spacer(Modifier.height(16.dp))
 
             } else {
                 if (errorMessage == null) {
                     Box(
-                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("No profile data available.")

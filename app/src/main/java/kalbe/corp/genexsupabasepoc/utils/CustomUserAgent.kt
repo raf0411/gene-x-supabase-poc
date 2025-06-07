@@ -12,5 +12,5 @@ fun getCustomUserAgent(): String {
     val sdkInt = Build.VERSION.SDK_INT
 
     return "$appName/$appVersion " +
-            "(Android/$osVersion; SDK/$sdkInt; $deviceManufacturer/$deviceModel) "
+            "(Android/$osVersion; SDK/$sdkInt; $deviceManufacturer/$deviceModel)"
 }

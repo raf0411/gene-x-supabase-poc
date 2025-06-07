@@ -29,9 +29,6 @@ sealed class Routes {
     data object ProfileScreen : Routes()
 
     @Serializable
-    data object ProfileSelectionScreen : Routes()
-
-    @Serializable
     data object ProductCatalogueScreen : Routes() 
 
     @Serializable
@@ -42,4 +39,10 @@ sealed class Routes {
 
     @Serializable
     data class ProductDetailsScreen(val productID: String) : Routes()
+
+    @Serializable
+    data object MfaSetupScreen : Routes()
+
+    @Serializable
+    data object MfaChallengeScreen : Routes()
 }
