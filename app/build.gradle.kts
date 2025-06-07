@@ -66,9 +66,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging.ktx)
 
-    // Coil for image loading
     implementation(libs.coil.compose.v260)
-    // Coil's SVG decoder
     implementation(libs.coil.svg)
 
     // Supabase

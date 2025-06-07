@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import coil.Coil
 import com.google.firebase.messaging.FirebaseMessaging
 import kalbe.corp.genexsupabasepoc.navigation.NavGraph
 import kalbe.corp.genexsupabasepoc.navigation.Routes
@@ -25,6 +26,7 @@ import kalbe.corp.genexsupabasepoc.repositories.UserRepository
 import kalbe.corp.genexsupabasepoc.repositories.WishlistRepository
 import kalbe.corp.genexsupabasepoc.repositories.profileDataStore
 import kalbe.corp.genexsupabasepoc.ui.theme.GeneXSupabasePOCTheme
+import kalbe.corp.genexsupabasepoc.utils.CoilLoader
 import kalbe.corp.genexsupabasepoc.viewModel.ProfileViewModelFactory
 
 class MainActivity : ComponentActivity() {
@@ -54,6 +56,8 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { keepOn }
 
         super.onCreate(savedInstanceState)
+
+        Coil.setImageLoader(CoilLoader.get(applicationContext))
 
         askNotificationPermission()
 

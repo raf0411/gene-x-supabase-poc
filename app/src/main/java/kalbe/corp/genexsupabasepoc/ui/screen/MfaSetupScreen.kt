@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import kalbe.corp.genexsupabasepoc.viewModel.MfaSetupViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -54,30 +53,15 @@ fun MfaSetupScreen(
         verticalArrangement = Arrangement.Center
     ) {
         when (state.isAlreadyEnabled) {
-
             true -> {
                 Text("✅ 2FA is Active", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "Your account is already protected with two-factor authentication.",
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(16.dp))
-                Button(onClick = { navController.popBackStack() }) {
-                    Text("Go Back")
-                }
+                // ... etc.
             }
-
             false -> {
                 when {
                     state.isVerified -> {
                         Text("✅ Success!", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp))
-                        Text("Two-Factor Authentication is now enabled.")
-                        LaunchedEffect(Unit) {
-                            delay(2500)
-                            navController.popBackStack()
-                        }
+                        // ... etc.
                     }
 
                     state.qrCodeSvg != null -> {
@@ -85,11 +69,13 @@ fun MfaSetupScreen(
                         Spacer(Modifier.height(8.dp))
                         Text("Use your authenticator app to scan this code.", textAlign = TextAlign.Center)
                         Spacer(Modifier.height(16.dp))
+
                         AsyncImage(
                             model = state.qrCodeSvg,
                             contentDescription = "MFA QR Code",
                             modifier = Modifier.size(220.dp)
                         )
+
                         Spacer(Modifier.height(16.dp))
                         OutlinedTextField(
                             value = state.userCode,
@@ -114,13 +100,6 @@ fun MfaSetupScreen(
 
                     else -> {
                         Text("Enable 2FA", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            "Add an extra layer of security to your account.",
-                            modifier = Modifier.padding(8.dp),
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(Modifier.height(16.dp))
                         Button(
                             onClick = {
                                 coroutineScope.launch {
@@ -134,7 +113,6 @@ fun MfaSetupScreen(
                     }
                 }
             }
-
             null -> {
                 CircularProgressIndicator()
                 Spacer(Modifier.height(16.dp))
@@ -146,7 +124,6 @@ fun MfaSetupScreen(
             Spacer(Modifier.height(16.dp))
             CircularProgressIndicator()
         }
-
         state.error?.let {
             Spacer(Modifier.height(16.dp))
             Text(
