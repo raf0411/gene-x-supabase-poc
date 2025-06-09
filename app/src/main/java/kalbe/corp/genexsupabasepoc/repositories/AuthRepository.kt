@@ -102,53 +102,6 @@ class AuthRepository(
         }
     }
 
-//    suspend fun loginUser(email: String, password: String): Boolean {
-//        try {
-//            supabaseClient.auth.signInWith(Email) {
-//                this.email = email
-//                this.password = password
-//            }
-//
-//            val currentUser = supabaseClient.auth.currentUserOrNull()
-//            val currentSession = supabaseClient.auth.currentSessionOrNull()
-//
-//            if (currentUser != null && currentSession != null) {
-//                sendLoginSuccessEvent(currentUser.id)
-//                Log.d("SecurityCheck", "User ${currentUser.id} logged in successfully.")
-//
-//                checkAccessTokenDuration(currentSession)
-//                securePrefs.putEncrypted("access_token", currentSession.accessToken)
-//                securePrefs.putEncrypted("refresh_token", currentSession.refreshToken)
-//                securePrefs.putEncrypted("expires_at", currentSession.expiresAt.toString())
-//
-//                val authId = currentUser.id
-//                    ?: throw Exception("User not logged in after successful authentication check.")
-//
-//                val userProfile = supabaseClient.from("users")
-//                    .select {
-//                        filter {
-//                            eq("account_id", authId)
-//                        }
-//                    }
-//                    .decodeSingle<UserProfile>()
-//
-//                return userProfile.isFirstTimeLogin
-//
-//            } else {
-//                sendLoginFailedEvent(email, "Login failed: No user session established after attempt.")
-//                Log.d("SecurityCheck", "Login failed: No user session established after attempt.")
-//                return false
-//            }
-//
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            val errorMessage = e.message ?: "Unknown login error"
-//            sendLoginFailedEvent(email, "Login failed: $errorMessage")
-//            Log.d("SecurityCheck", "Login failed: $errorMessage")
-//            throw e
-//        }
-//    }
-
     suspend fun loginUser(email: String, password: String): LoginResult {
         val bypassMfaForDevelopment = true
 
@@ -278,17 +231,14 @@ class AuthRepository(
         okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Failed to log login success: ${e.message}")
-                // TODO: Handle error: Log ke Crashlytics, tunjukkan pesan ke pengguna (jika relevan)
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
                     if (it.isSuccessful) {
                         println("Login success logged successfully!")
-                        // TODO: Optional: Log response body jika perlu
                     } else {
                         println("Failed to log login success: ${it.code} ${it.message} - ${it.body?.string()}")
-                        // TODO: Handle API error: Log response error
                     }
                 }
             }
@@ -310,7 +260,6 @@ class AuthRepository(
         okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Failed to log failed attempt: ${e.message}")
-                // TODO: Handle error
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -319,7 +268,6 @@ class AuthRepository(
                         println("Login failed attempt logged successfully!")
                     } else {
                         println("Failed to log failed attempt: ${it.code} ${it.message} - ${it.body?.string()}")
-                        // TODO: Handle API error
                     }
                 }
             }

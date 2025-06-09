@@ -68,6 +68,7 @@ dependencies {
 
     implementation(libs.coil.compose.v260)
     implementation(libs.coil.svg)
+    implementation(libs.core)
 
     // Supabase
     implementation (platform (libs.supabase.bom))

@@ -2,6 +2,7 @@ package kalbe.corp.genexsupabasepoc.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.mfa.AuthenticatorAssuranceLevel
 import io.github.jan.supabase.auth.mfa.FactorType
@@ -9,7 +10,10 @@ import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
+// Your State class is already perfect for the new solution. No changes needed here.
 data class MfaEnrollmentState(
     val qrCodeSvg: String? = null,
     val factorId: String? = null,
@@ -17,7 +21,8 @@ data class MfaEnrollmentState(
     val error: String? = null,
     val userCode: String = "",
     val isVerified: Boolean = false,
-    val isAlreadyEnabled: Boolean? = null
+    val isAlreadyEnabled: Boolean? = null,
+    val otpUri: String? = null,
 )
 
 class MfaSetupViewModel : ViewModel() {
@@ -27,83 +32,95 @@ class MfaSetupViewModel : ViewModel() {
 
     private val supabase = supabaseClient
 
-    // This function for updating text field state is fine as is
     fun onCodeChanged(newCode: String) {
-        _enrollmentState.value = _enrollmentState.value.copy(userCode = newCode)
+        _enrollmentState.update { it.copy(userCode = newCode) }
     }
 
-    // --- CHANGE #1: Make this a suspend function and remove viewModelScope ---
-    suspend fun checkCurrentMfaStatus() {
-        _enrollmentState.value = _enrollmentState.value.copy(isLoading = true, error = null)
-        try {
-            val (currentAal, _) = supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-            Log.d("MfaCheck", "Current session AAL is: $currentAal")
+    fun checkCurrentMfaStatus() {
+        viewModelScope.launch {
+            _enrollmentState.update { it.copy(isLoading = true, error = null) }
+            try {
+                val (currentAal, _) = supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+                Log.d("MfaCheck", "Current session AAL is: $currentAal")
 
-            val hasMfa = currentAal == AuthenticatorAssuranceLevel.AAL2
+                val hasMfa = currentAal == AuthenticatorAssuranceLevel.AAL2
 
-            _enrollmentState.value = _enrollmentState.value.copy(
-                isLoading = false,
-                isAlreadyEnabled = hasMfa
-            )
-        } catch (e: Throwable) {
-            Log.e("MfaCheck", "Error checking AAL: ", e)
-            _enrollmentState.value = _enrollmentState.value.copy(
-                isLoading = false,
-                isAlreadyEnabled = false,
-                error = "Could not check security status: ${e.message}"
-            )
+                _enrollmentState.update {
+                    it.copy(isLoading = false, isAlreadyEnabled = hasMfa)
+                }
+            } catch (e: Throwable) {
+                Log.e("MfaCheck", "Error checking AAL: ", e)
+                _enrollmentState.update {
+                    it.copy(
+                        isLoading = false,
+                        isAlreadyEnabled = false,
+                        error = "Could not check security status: ${e.message}"
+                    )
+                }
+            }
         }
     }
 
-    suspend fun startTotpEnrollment() {
-        _enrollmentState.value = _enrollmentState.value.copy(isLoading = true, error = null)
-        try {
-            val factor = supabase.auth.mfa.enroll(factorType = FactorType.TOTP)
+    fun startTotpEnrollment() {
+        viewModelScope.launch {
+            _enrollmentState.update { it.copy(isLoading = true, error = null) }
+            try {
+                val factor = supabase.auth.mfa.enroll(factorType = FactorType.TOTP)
 
-            val totpData = factor.data as? FactorType.TOTP.Response
-                ?: throw IllegalStateException("Could not cast factor data to TOTP Response.")
+                val totpData = factor.data as? FactorType.TOTP.Response
+                    ?: throw IllegalStateException("Could not cast factor data to TOTP Response.")
 
-            val qrCodeString = totpData.qrCode
+                val qrCodeString = totpData.qrCode
+                Log.d("QRCodeCheck", "Raw SVG from Supabase: $qrCodeString")
 
-            Log.d("QRCodeCheck", "QR Code: ${qrCodeString}")
+                val otpUri = totpData.uri
+                Log.d("QRCodeCheck", "OTP Auth URI: $otpUri")
 
-            _enrollmentState.value = _enrollmentState.value.copy(
-                isLoading = false,
-                qrCodeSvg = qrCodeString,
-                factorId = factor.id
-            )
+                _enrollmentState.update {
+                    it.copy(
+                        isLoading = false,
+                        qrCodeSvg = qrCodeString,
+                        otpUri = otpUri,
+                        factorId = factor.id
+                    )
+                }
 
-        } catch (e: Throwable) {
-            _enrollmentState.value = _enrollmentState.value.copy(
-                isLoading = false,
-                error = e.message ?: "An unknown error occurred."
-            )
+            } catch (e: Throwable) {
+                Log.e("MfaEnroll", "Error enrolling factor", e)
+                _enrollmentState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e.message ?: "An unknown error occurred."
+                    )
+                }
+            }
         }
     }
 
-    // --- CHANGE #3: Make this a suspend function and remove viewModelScope ---
-    suspend fun verifyAndEnableMfa() {
-        val currentState = _enrollmentState.value
-        val factorId = currentState.factorId ?: return
-        val code = currentState.userCode
+    fun verifyAndEnableMfa() {
+        viewModelScope.launch {
+            val currentState = _enrollmentState.value
+            val factorId = currentState.factorId ?: return@launch
+            val code = currentState.userCode
 
-        _enrollmentState.value = currentState.copy(isLoading = true, error = null)
-        try {
-            val challenge = supabase.auth.mfa.createChallenge(factorId)
-            supabase.auth.mfa.verifyChallenge(
-                factorId = factorId,
-                challengeId = challenge.id,
-                code = code
-            )
-            _enrollmentState.value = _enrollmentState.value.copy(
-                isLoading = false,
-                isVerified = true
-            )
-        } catch (e: Throwable) {
-            _enrollmentState.value = _enrollmentState.value.copy(
-                isLoading = false,
-                error = "Verification failed: ${e.message}"
-            )
+            _enrollmentState.update { it.copy(isLoading = true, error = null) }
+            try {
+                val challenge = supabase.auth.mfa.createChallenge(factorId)
+                supabase.auth.mfa.verifyChallenge(
+                    factorId = factorId,
+                    challengeId = challenge.id,
+                    code = code
+                )
+                _enrollmentState.update { it.copy(isLoading = false, isVerified = true) }
+            } catch (e: Throwable) {
+                Log.e("MfaVerify", "Error verifying challenge", e)
+                _enrollmentState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Verification failed: ${e.message}"
+                    )
+                }
+            }
         }
     }
 }

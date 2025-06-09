@@ -29,7 +29,6 @@ import androidx.compose.material.icons.outlined.Scale
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.Timer
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -63,9 +62,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.mfa.FactorType
-import kalbe.corp.genexsupabasepoc.data.network.supabaseClient
 import kalbe.corp.genexsupabasepoc.navigation.Routes
 import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
 import kalbe.corp.genexsupabasepoc.repositories.UserRepository
@@ -234,30 +230,6 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
         ) {
-            Button(onClick = {
-                Log.d("MfaApiTest", "--- Running Raw Enroll Test ---")
-                // Use the coroutineScope you already have in ProfileScreen
-                coroutineScope.launch {
-                    try {
-                        Log.d("MfaApiTest", "Attempting to call enroll()...")
-
-                        // We call the function directly from the client
-                        val factor = supabaseClient.auth.mfa.enroll(factorType = FactorType.TOTP)
-
-                        Log.d("MfaApiTest", "✅ SUCCESS! Enroll returned a factor with ID: ${factor.id}")
-                        Toast.makeText(context, "SUCCESS: Check MfaApiTest Log!", Toast.LENGTH_SHORT).show()
-
-                    } catch (e: Throwable) { // Catching Throwable is safer for debugging
-                        Log.e("MfaApiTest", "❌ FAILURE! The enroll() call crashed.", e)
-                        Toast.makeText(context, "FAILURE: Check MfaApiTest Log!", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }) {
-                Text("Run Raw Enroll Test")
-            }
-
-            Spacer(Modifier.height(16.dp))
-
             if (isLoading) {
                 Box(
                     modifier = Modifier
@@ -349,16 +321,13 @@ fun ProfileScreen(
                 ProfileHeaderToggle(headerText = "General")
                 ProfileButtonItem(
                     text = "About AI", icon = Icons.Outlined.ChatBubbleOutline, onClick = {
-                        // This will navigate to the new screen we are about to create
                         navController.navigate(Routes.MfaSetupScreen)
                     })
                 ProfileButtonItem(text = "About Us", icon = Icons.Outlined.Info, onClick = {
-                    // This will navigate to the new screen we are about to create
                     navController.navigate(Routes.MfaSetupScreen)
                 })
                 ProfileButtonItem(
                     text = "Terms of Services", icon = Icons.Outlined.Description, onClick = {
-                        // This will navigate to the new screen we are about to create
                         navController.navigate(Routes.MfaSetupScreen)
                     })
 

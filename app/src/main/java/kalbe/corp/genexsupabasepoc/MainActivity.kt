@@ -113,7 +113,6 @@ class MainActivity : ComponentActivity() {
             ) {
                 getAndStoreFcmToken()
             } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                // TODO: Display an educational UI explaining why the permission is needed
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             } else {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -136,21 +135,6 @@ class MainActivity : ComponentActivity() {
                 Log.w(TAG, "Fetched FCM token is null.")
                 return@addOnCompleteListener
             }
-
-//            lifecycleScope.launch {
-//                val userId = supabaseClient.auth.currentUserOrNull()?.id
-//
-//                if (userId != null) {
-//                    val success = userRepository.updateUserFcmToken(userId, fcmToken)
-//                    if (success) {
-//                        Log.i(TAG, "FCM Token sent to Supabase from MainActivity.")
-//                    } else {
-//                        Log.w(TAG, "Failed to send FCM Token to Supabase from MainActivity.")
-//                    }
-//                } else {
-//                    Log.w(TAG, "User not authenticated, cannot send FCM token from MainActivity.")
-//                }
-//            }
         }
     }
 }
