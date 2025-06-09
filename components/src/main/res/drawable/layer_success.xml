@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Background circle -->
+    <item
+        android:width="10dp"
+        android:height="10dp"
+        android:gravity="center">
+        <shape>
+            <solid android:color="#ffff"/>
+            <size android:width="10dp" android:height="10dp"/>
+        </shape>
+    </item>
+
+    <!-- Reference the vector drawable -->
+    <item android:drawable="@drawable/s_success"/>
+</layer-list>

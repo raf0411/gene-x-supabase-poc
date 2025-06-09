@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Dynamic Layer Pro</string>
+    <string name="primary">Primary</string>
+    <string name="secondary">Secondary</string>
+    <string name="iconleft">iconLeft</string>
+    <string name="iconRight">iconRight</string>
+    <string name="title">Title</string>
+    <string name="input_field">Input Field</string>
+    <string name="state">State</string>
+    <string name="type">Type</string>
+    <string name="des">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</string>
+</resources>
