@@ -134,6 +134,25 @@ fun MfaSetupScreen(
                             modifier = Modifier.size(220.dp)
                         )
 
+                        state.setupKey?.let { key ->
+                            Spacer(Modifier.height(24.dp))
+
+                            Text(
+                                text = "Can't scan? enter this key manually:",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+
+                            Spacer(Modifier.height(8.dp))
+
+                            OutlinedTextField(
+                                value = key,
+                                onValueChange = { },
+                                readOnly = true,
+                                label = { Text("Setup Key") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
                         Spacer(Modifier.height(16.dp))
                         OutlinedTextField(
                             value = state.userCode,

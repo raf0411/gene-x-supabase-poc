@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 data class MfaEnrollmentState(
     val qrCodeSvg: String? = null,
     val factorId: String? = null,
+    val setupKey: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
     val userCode: String = "",
@@ -71,16 +72,16 @@ class MfaSetupViewModel : ViewModel() {
                     ?: throw IllegalStateException("Could not cast factor data to TOTP Response.")
 
                 val qrCodeString = totpData.qrCode
-                Log.d("QRCodeCheck", "Raw SVG from Supabase: $qrCodeString")
+                val secretKey = totpData.secret
 
                 val otpUri = totpData.uri
-                Log.d("QRCodeCheck", "OTP Auth URI: $otpUri")
 
                 _enrollmentState.update {
                     it.copy(
                         isLoading = false,
                         qrCodeSvg = qrCodeString,
                         otpUri = otpUri,
+                        setupKey = secretKey,
                         factorId = factor.id
                     )
                 }
