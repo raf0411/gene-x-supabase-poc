@@ -103,7 +103,7 @@ class AuthRepository(
     }
 
     suspend fun loginUser(email: String, password: String): LoginResult {
-        val bypassMfaForDevelopment = true
+        val bypassMfaForDevelopment = false
 
         try {
             supabaseClient.auth.signInWith(Email) {
