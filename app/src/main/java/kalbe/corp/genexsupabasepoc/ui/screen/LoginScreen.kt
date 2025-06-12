@@ -37,8 +37,8 @@ import com.dynamiclayer.components.inputField.util.InputFieldSize
 import com.dynamiclayer.components.inputField.util.InputFieldState
 import com.dynamiclayer.components.inputField.util.InputFieldType
 import kalbe.corp.genexsupabasepoc.R
-import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
 import kalbe.corp.genexsupabasepoc.navigation.Routes
+import kalbe.corp.genexsupabasepoc.repositories.AuthRepository
 import kotlinx.coroutines.launch
 
 @Composable
@@ -137,10 +137,6 @@ fun LoginScreen(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-//                    colors = ButtonDefaults.buttonColors(
-//                        containerColor = Color.Black,
-//                        contentColor = Color.White
-//                    )
                 )
 
                 errorMessage?.let {

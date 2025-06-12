@@ -16,6 +16,13 @@ if(localPropertiesFile.exists() && localPropertiesFile.isFile){
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        force("androidx.test.ext:junit:1.1.5")
+        force("androidx.test.espresso:espresso-core:3.5.1")
+    }
+}
+
 android {
     namespace = "kalbe.corp.genexsupabasepoc"
     compileSdk = 35
@@ -70,6 +77,9 @@ dependencies {
     implementation(libs.coil.svg)
     implementation(libs.core)
 
+    androidTestImplementation(libs.androidx.compose.ui.ui.test.junit4)
+    debugImplementation(libs.ui.test.manifest)
+
     // Supabase
     implementation (platform (libs.supabase.bom))
     implementation (libs.auth.kt)
@@ -103,6 +113,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui.test.junit4.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -116,4 +127,5 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.fragment.ktx)
+    implementation(kotlin("test"))
 }
