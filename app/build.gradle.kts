@@ -88,7 +88,7 @@ dependencies {
     implementation (libs.postgrest.kt)
     implementation (libs.ktor.client.android)
     implementation (libs.kotlinx.serialization.json)
-    implementation(libs.gotrue.kt)
+    implementation (libs.gotrue.kt)
 
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
