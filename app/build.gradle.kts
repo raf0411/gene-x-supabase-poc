@@ -80,6 +80,9 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.ui.test.junit4)
     debugImplementation(libs.ui.test.manifest)
 
+    testImplementation(libs.mockito.core)
+    androidTestImplementation(libs.mockito.android)
+
     // Supabase
     implementation (platform (libs.supabase.bom))
     implementation (libs.auth.kt)
